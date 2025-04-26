@@ -292,7 +292,6 @@
      //update mentor's BST since the key (meeting count) has changed , the structure of BST is compromised
      //we update by deleting that mentee from BST and adding again
     User* mentor = mentee->data.mentee_data.mentor;
-    User* mentor = mentee->data.mentee_data.mentor;
     mentor->data.mentor_data.mentees_bst_root = remove_bst_node( mentor->data.mentor_data.mentees_bst_root, mentee);
     mentor->data.mentor_data.mentees_bst_root = insert_bst_node(mentor->data.mentor_data.mentees_bst_root, mentee);
      
