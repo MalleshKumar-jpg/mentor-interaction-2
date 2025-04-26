@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mentorship System - Mentor Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="dashboard-nav">
+            <h1>Mentorship System</h1>
+            <div>
+                <span>Welcome, <span id="user-name"></span></span>
+                <button id="logout-button">Logout</button>
+            </div>
+        </div>
+        
+        <div class="dashboard-container">
+            <div class="dashboard-header">
+                <h2>Mentor Dashboard</h2>
+            </div>
+            
+            <div class="tab-container">
+                <div class="tab-buttons">
+                    <button class="tab-button" data-tab="mentees-tab">Mentees</button>
+                    <button class="tab-button" data-tab="tasks-tab">Tasks</button>
+                    <button class="tab-button" data-tab="meetings-tab">Meeting Notes</button>
+                </div>
+                
+                <div id="mentees-tab" class="tab-content">
+                    <h3>My Mentees</h3>
+                    <div id="mentees-list">
+                        <!-- Mentees will be loaded here -->
+                    </div>
+                </div>
+                
+                <div id="tasks-tab" class="tab-content">
+                    <h3>Tasks</h3>
+                    <div id="tasks-list">
+                        <!-- Tasks will be loaded here -->
+                    </div>
+                </div>
+                
+                <div id="meetings-tab" class="tab-content">
+                    <h3>Meeting Notes</h3>
+                    <div id="meetings-list">
+                        <!-- Meeting notes will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Task Modal -->
+        <div id="task-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-button">&times;</span>
+                <h2 id="task-form-title">Add New Task</h2>
+                <form id="task-form">
+                    <input type="hidden" id="task-mentee" name="mentee">
+                    <div class="form-group">
+                        <label for="task-description">Task Description:</label>
+                        <textarea id="task-description" name="description" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="task-due-date">Due Date:</label>
+                        <input type="text" id="task-due-date" name="due-date" placeholder="DD-MM-YYYY" required>
+                        <small>Format: DD-MM-YYYY (e.g., 15-05-2025)</small>
+                    </div>
+                    <div class="button-group">
+                        <button type="submit">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Meeting Note Modal -->
+        <div id="meeting-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-button">&times;</span>
+                <h2 id="meeting-form-title">Add New Meeting Note</h2>
+                <form id="meeting-form">
+                    <input type="hidden" id="meeting-mentee" name="mentee">
+                    <div class="form-group">
+                        <label for="meeting-date">Meeting Date:</label>
+                        <input type="text" id="meeting-date" name="date" placeholder="DD-MM-YYYY" required>
+                        <small>Format: DD-MM-YYYY (e.g., 15-05-2025)</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="meeting-summary">Meeting Summary:</label>
+                        <textarea id="meeting-summary" name="summary" required></textarea>
+                    </div>
+                    <div class="button-group">
+                        <button type="submit">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

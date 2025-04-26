@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mentorship System - Mentee Registration</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Mentorship System</h1>
+        <div class="register-container">
+            <h2>Mentee Registration</h2>
+            <div class="error-message" style="display: none;"></div>
+            <div class="success-message" style="display: none;"></div>
+            <form id="register-mentee-form">
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <div class="form-group">
+                    <label for="name">Full Name:</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required>
+                    <small>Format: example@domain.com</small>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone Number:</label>
+                    <input type="tel" id="phone" name="phone" required>
+                    <small>Format: 10 digits (e.g., 1234567890)</small>
+                </div>
+                <div class="form-group">
+                    <label for="department">Department:</label>
+                    <input type="text" id="department" name="department" required>
+                </div>
+                <div class="form-group">
+                    <label for="year">Year of Study:</label>
+                    <select id="year" name="year" required>
+                        <option value="1">First Year</option>
+                        <option value="2">Second Year</option>
+                        <option value="3">Third Year</option>
+                        <option value="4">Fourth Year</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="digital-id">Digital ID:</label>
+                    <input type="text" id="digital-id" name="digital-id" required>
+                    <small>Format: 7 digits</small>
+                </div>
+                <div class="form-group">
+                    <label for="registration-number">Registration Number:</label>
+                    <input type="text" id="registration-number" name="registration-number" required>
+                    <small>Format: 13 digits</small>
+                </div>
+                <div class="form-group">
+                    <label for="parent-contact">Parent Contact:</label>
+                    <input type="text" id="parent-contact" name="parent-contact" required>
+                </div>
+                <div class="form-group">
+                    <label for="mentor">Select Mentor:</label>
+                    <select id="mentor" name="mentor" required>
+                        <option value="">-- Select a Mentor --</option>
+                    </select>
+                </div>
+                <div class="button-group">
+                    <button type="submit">Register</button>
+                </div>
+            </form>
+            <div class="links">
+                <a href="index.html">Back to Login</a>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
