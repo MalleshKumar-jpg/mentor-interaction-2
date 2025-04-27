@@ -1,4 +1,3 @@
-@ -1,105 +0,0 @@
 #ifndef BACKEND_H
 #define BACKEND_H
 
@@ -16,26 +15,23 @@
 #define MAX_DEPARTMENT_LENGTH 50
 #define MAX_DESCRIPTION_LENGTH 500
 #define MAX_SUMMARY_LENGTH 1000
-#define MAX_DATE_LENGTH 11  // DD-MM-YYYY
+#define MAX_DATE_LENGTH 11  
 #define MAX_DIGITAL_ID_LENGTH 10
 #define MAX_REG_NUMBER_LENGTH 15
 #define MAX_PARENT_CONTACT_LENGTH 100
 #define HASH_TABLE_SIZE 1000
 #define MAX_MENTORS 100
 
-// Enums
 typedef enum {
     MENTEE,
     MENTOR
 } UserRole;
 
-// Forward declarations
 struct MenteeBSTNode;
 struct User;
 struct Task;
 struct Meeting_note;
 
-// Struct definitions
 typedef struct Task {
     char description[MAX_DESCRIPTION_LENGTH];
     char due_date[MAX_DATE_LENGTH];
@@ -64,7 +60,6 @@ typedef struct User {
     char department[MAX_DEPARTMENT_LENGTH];
     UserRole role;
     
-    // Role-specific fields
     union {
         struct {
             int year;
@@ -81,14 +76,12 @@ typedef struct User {
         } mentor_data;
     } data;
     
-    struct User* next;  // For hash table collision resolution
+    struct User* next;  //for hash table collision
 } User;
 
-// Function prototypes
 void initialize_system();
 User* find_user(char* username);
 
-// API functions for server.c to use
 User* api_login(char* username, char* password);
 void api_logout();
 User* api_register_mentor(char* username, char* password, char* name, char* email, char* phone, char* department);

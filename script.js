@@ -1,5 +1,3 @@
-// script.js - Main JavaScript functionality for mentorship system
-
 // Global variables
 let currentUser = null;
 
@@ -284,14 +282,21 @@ function setupModals() {
         });
     }
 }
-
-// Form submission handlers
 function taskFormHandler(e) {
     e.preventDefault();
     
     const menteeUsername = document.getElementById("task-mentee").value;
     const description = document.getElementById("task-description").value;
-    const dueDate = document.getElementById("task-due-date").value;
+    const dueDateInput = document.getElementById("task-due-date");
+    
+    // Validate date is today or in the future
+    if (!validateTaskDate(dueDateInput.value)) {
+        showError("Task due date must be today or in the future");
+        return;
+    }
+    
+    // Format the date from yyyy-mm-dd to dd-mm-yyyy for backend
+    const dueDate = formatDateForBackend(dueDateInput.value);
     
     addTask(menteeUsername, description, dueDate);
 }
@@ -300,12 +305,20 @@ function meetingFormHandler(e) {
     e.preventDefault();
     
     const menteeUsername = document.getElementById("meeting-mentee").value;
-    const date = document.getElementById("meeting-date").value;
+    const dateInput = document.getElementById("meeting-date");
     const summary = document.getElementById("meeting-summary").value;
+    
+    // Validate date is today or in the past
+    if (!validateMeetingDate(dateInput.value)) {
+        showError("Meeting date must be today or in the past");
+        return;
+    }
+    
+    // Format the date from yyyy-mm-dd to dd-mm-yyyy for backend
+    const date = formatDateForBackend(dateInput.value);
     
     addMeetingNote(menteeUsername, date, summary);
 }
-
 // API Functions
 async function login(username, password) {
     try {
@@ -352,9 +365,24 @@ async function logout() {
 
 async function registerMentor(username, password, name, email, phone, department) {
     try {
-        // Validate inputs
-        if (!validateEmail(email) || !validatePhone(phone)) {
-            showError("Invalid email or phone number format");
+        // Enhanced validation with more detailed error messages
+        if (!validateName(name)) {
+            showError("Invalid name format. Name should start with a letter and contain only letters, spaces, and periods.");
+            return;
+        }
+        
+        if (!validateEmail(email)) {
+            showError("Invalid email format. Please provide a valid email address.");
+            return;
+        }
+        
+        if (!validatePhone(phone)) {
+            showError("Invalid phone number format. Please enter 10 digits.");
+            return;
+        }
+        
+        if (!validatePassword(password)) {
+            showError("Password must be at least 8 characters and contain at least one uppercase letter, one lowercase letter, and one number.");
             return;
         }
         
@@ -382,14 +410,41 @@ async function registerMentor(username, password, name, email, phone, department
         showError("Server error. Please try again later.");
     }
 }
-
-async function registerMentee(username, password, name, email, phone, department, 
-                             year, digitalId, registrationNumber, parentContact, mentorUsername) {
+async function registerMentee(username, password, name, email, phone, department, year, digitalId, registrationNumber, parentContact, mentorUsername) {
     try {
-        // Validate inputs
-        if (!validateEmail(email) || !validatePhone(phone) || 
-            !validateDigitalId(digitalId) || !validateRegistrationNumber(registrationNumber)) {
-            showError("Invalid input format");
+        // Enhanced validation with more detailed error messages
+        if (!validateName(name)) {
+            showError("Invalid name format. Name should start with a letter and contain only letters, spaces, and periods.");
+            return;
+        }
+        
+        if (!validateEmail(email)) {
+            showError("Invalid email format. Please provide a valid email address.");
+            return;
+        }
+        
+        if (!validatePhone(phone)) {
+            showError("Invalid phone number format. Please enter 10 digits.");
+            return;
+        }
+        
+        if (!validateDigitalId(digitalId)) {
+            showError("Invalid Digital ID format. Please enter 7 digits.");
+            return;
+        }
+        
+        if (!validateRegistrationNumber(registrationNumber)) {
+            showError("Invalid Registration Number format. Please enter 13 digits.");
+            return;
+        }
+        
+        if (!validateParentContact(parentContact)) {
+            showError("Invalid Parent Contact. Please provide a valid email or 10-digit phone number.");
+            return;
+        }
+        
+        if (!validatePassword(password)) {
+            showError("Password must be at least 8 characters and contain at least one uppercase letter, one lowercase letter, and one number.");
             return;
         }
         
@@ -421,7 +476,6 @@ async function registerMentee(username, password, name, email, phone, department
         showError("Server error. Please try again later.");
     }
 }
-
 async function loadMentors() {
     try {
         const response = await fetch("/api/mentors");
@@ -579,7 +633,15 @@ async function viewMenteeTasks(menteeUsername) {
                     document.getElementById("task-form").reset();
                     document.getElementById("task-mentee").value = mentee;
                     document.getElementById("task-description").value = task.description;
-                    document.getElementById("task-due-date").value = task.dueDate;
+                    
+                    // Convert the date format from dd-mm-yyyy to yyyy-mm-dd for the date input
+                    const formattedDate = formatDateForInput(task.dueDate);
+                    document.getElementById("task-due-date").value = formattedDate;
+                    
+                    // Set min date to today
+                    const today = new Date().toISOString().split('T')[0];
+                    document.getElementById("task-due-date").min = today;
+                    
                     document.getElementById("task-form-title").textContent = "Edit Task";
                     
                     // Set the form submission handler
@@ -590,7 +652,16 @@ async function viewMenteeTasks(menteeUsername) {
                         
                         const menteeUsername = document.getElementById("task-mentee").value;
                         const description = document.getElementById("task-description").value;
-                        const dueDate = document.getElementById("task-due-date").value;
+                        const dueDateInput = document.getElementById("task-due-date");
+                        
+                        // Validate date is today or in the future
+                        if (!validateTaskDate(dueDateInput.value)) {
+                            showError("Task due date must be today or in the future");
+                            return;
+                        }
+                        
+                        // Format the date from yyyy-mm-dd to dd-mm-yyyy for backend
+                        const dueDate = formatDateForBackend(dueDateInput.value);
                         
                         editTask(menteeUsername, index, description, dueDate);
                     });
@@ -653,7 +724,15 @@ async function viewMenteeMeetings(menteeUsername) {
                     document.getElementById("meeting-modal").style.display = "block";
                     document.getElementById("meeting-form").reset();
                     document.getElementById("meeting-mentee").value = mentee;
-                    document.getElementById("meeting-date").value = meeting.date;
+                    
+                    // Convert the date format from dd-mm-yyyy to yyyy-mm-dd for the date input
+                    const formattedDate = formatDateForInput(meeting.date);
+                    document.getElementById("meeting-date").value = formattedDate;
+                    
+                    // Set max date to today
+                    const today = new Date().toISOString().split('T')[0];
+                    document.getElementById("meeting-date").max = today;
+                    
                     document.getElementById("meeting-summary").value = meeting.summary;
                     document.getElementById("meeting-form-title").textContent = "Edit Meeting Note";
                     
@@ -664,8 +743,17 @@ async function viewMenteeMeetings(menteeUsername) {
                         e.preventDefault();
                         
                         const menteeUsername = document.getElementById("meeting-mentee").value;
-                        const date = document.getElementById("meeting-date").value;
+                        const dateInput = document.getElementById("meeting-date");
                         const summary = document.getElementById("meeting-summary").value;
+                        
+                        // Validate date is today or in the past
+                        if (!validateMeetingDate(dateInput.value)) {
+                            showError("Meeting date must be today or in the past");
+                            return;
+                        }
+                        
+                        // Format the date from yyyy-mm-dd to dd-mm-yyyy for backend
+                        const date = formatDateForBackend(dateInput.value);
                         
                         editMeetingNote(menteeUsername, index, date, summary);
                     });
@@ -686,28 +774,6 @@ async function viewMenteeMeetings(menteeUsername) {
     }
 }
 
-// Validation functions
-function validateEmail(email) {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(email);
-}
-
-function validatePhone(phone) {
-    const re = /^\d{10}$/;
-    return re.test(phone);
-}
-
-function validateDigitalId(digitalId) {
-    const re = /^\d{7}$/;
-    return re.test(digitalId);
-}
-
-function validateRegistrationNumber(registrationNumber) {
-    const re = /^\d{13}$/;
-    return re.test(registrationNumber);
-}
-
-// Utility functions
 function redirectToDashboard() {
     if (currentUser) {
         if (currentUser.role === "mentor") {
@@ -880,10 +946,33 @@ async function loadProfile() {
 // Update profile
 async function updateProfile(name, email, phone, department, year, digitalId, registrationNumber, parentContact) {
     try {
-        // Validate inputs
-        if (!validateEmail(email) || !validatePhone(phone) || 
-            !validateDigitalId(digitalId) || !validateRegistrationNumber(registrationNumber)) {
-            showError("Invalid input format");
+        if (!validateName(name)) {
+            showError("Invalid name format. Name should start with a letter and contain only letters, spaces, and periods.");
+            return;
+        }
+        
+        if (!validateEmail(email)) {
+            showError("Invalid email format. Please provide a valid email address.");
+            return;
+        }
+        
+        if (!validatePhone(phone)) {
+            showError("Invalid phone number format. Please enter 10 digits.");
+            return;
+        }
+        
+        if (!validateDigitalId(digitalId)) {
+            showError("Invalid Digital ID format. Please enter 7 digits.");
+            return;
+        }
+        
+        if (!validateRegistrationNumber(registrationNumber)) {
+            showError("Invalid Registration Number format. Please enter 13 digits.");
+            return;
+        }
+        
+        if (!validateParentContact(parentContact)) {
+            showError("Invalid Parent Contact. Please provide a valid email or 10-digit phone number.");
             return;
         }
         
@@ -917,8 +1006,8 @@ async function updateProfile(name, email, phone, department, year, digitalId, re
 // Task operations
 async function addTask(menteeUsername, description, dueDate) {
     try {
-        // Validate date
-        if (!validateDate(dueDate)) {
+        // Validate that the backend date format is correct
+        if (!validateBackendDateFormat(dueDate)) {
             showError("Invalid date format. Use DD-MM-YYYY");
             return;
         }
@@ -953,8 +1042,8 @@ async function addTask(menteeUsername, description, dueDate) {
 
 async function editTask(menteeUsername, taskIndex, description, dueDate) {
     try {
-        // Validate date
-        if (!validateDate(dueDate)) {
+        // Validate that the backend date format is correct
+        if (!validateBackendDateFormat(dueDate)) {
             showError("Invalid date format. Use DD-MM-YYYY");
             return;
         }
@@ -1015,8 +1104,8 @@ async function deleteTask(menteeUsername, taskIndex) {
 // Meeting note operations
 async function addMeetingNote(menteeUsername, date, summary) {
     try {
-        // Validate date
-        if (!validateDate(date)) {
+        // Validate that the backend date format is correct
+        if (!validateBackendDateFormat(date)) {
             showError("Invalid date format. Use DD-MM-YYYY");
             return;
         }
@@ -1054,8 +1143,8 @@ async function addMeetingNote(menteeUsername, date, summary) {
 
 async function editMeetingNote(menteeUsername, noteIndex, date, summary) {
     try {
-        // Validate date
-        if (!validateDate(date)) {
+        // Validate that the backend date format is correct
+        if (!validateBackendDateFormat(date)) {
             showError("Invalid date format. Use DD-MM-YYYY");
             return;
         }
@@ -1113,8 +1202,111 @@ async function deleteMeetingNote(menteeUsername, noteIndex) {
     }
 }
 
-// Date validation
-function validateDate(date) {
-    const re = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
-    return re.test(date);
+
+//validation functions
+function validateEmail(email) {
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z]+\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(email);
+}
+
+function validatePhone(phone) {
+    const phoneRegex = /^[0-9]{10}$/;
+    return phoneRegex.test(phone);
+}
+
+function validateDigitalId(digitalId) {
+    const digitalIdRegex = /^[0-9]{7}$/;
+    return digitalIdRegex.test(digitalId);
+}
+
+function validateRegistrationNumber(registrationNumber) {
+    const regNoRegex = /^[0-9]{13}$/;
+    return regNoRegex.test(registrationNumber);
+}
+
+function validateParentContact(parentContact) {
+    // This can be either an email or a phone number
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z]+\.[a-zA-Z]{2,}$/;
+    const phoneRegex = /^[0-9]{10}$/;
+    return emailRegex.test(parentContact) || phoneRegex.test(parentContact);
+}
+
+function validateName(name) {
+    const nameRegex = /^[a-zA-Z][a-zA-Z\s\.]*$/;
+    return nameRegex.test(name);
+}
+
+// Password validation: at least 8 characters, contains at least one uppercase, one lowercase, and one number
+function validatePassword(password) {
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
+    return passwordRegex.test(password);
+}
+
+// Date validation functions
+function validateTaskDate(dateString) {
+    // First check if the date is in proper yyyy-mm-dd format
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(dateString)) {
+        return false;
+    }
+    
+    const selectedDate = new Date(dateString);
+    // Check if the date is valid
+    if (isNaN(selectedDate.getTime())) {
+        return false;
+    }
+    
+    selectedDate.setHours(0, 0, 0, 0); // Reset time part for comparison
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time part for comparison
+    
+    // Task dates must be today or in the future
+    return selectedDate >= today;
+}
+
+function validateMeetingDate(dateString) {
+    // First check if the date is in proper yyyy-mm-dd format
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(dateString)) {
+        return false;
+    }
+    
+    const selectedDate = new Date(dateString);
+    // Check if the date is valid
+    if (isNaN(selectedDate.getTime())) {
+        return false;
+    }
+    
+    selectedDate.setHours(0, 0, 0, 0); // Reset time part for comparison
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time part for comparison
+    
+    // Meeting dates must be today or in the past
+    return selectedDate <= today;
+}
+
+// This validates dates in dd-mm-yyyy format (for compatibility with backend)
+function validateBackendDateFormat(dateString) {
+    const dateRegex = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
+    return dateRegex.test(dateString);
+}
+
+// Format date from yyyy-mm-dd to dd-mm-yyyy for backend
+function formatDateForBackend(dateString) {
+    const parts = dateString.split('-');
+    if (parts.length === 3) {
+        return `${parts[2]}-${parts[1]}-${parts[0]}`;
+    }
+    return dateString;
+}
+
+// Format date from dd-mm-yyyy to yyyy-mm-dd for HTML date input
+function formatDateForInput(dateString) {
+    const parts = dateString.split('-');
+    if (parts.length === 3) {
+        return `${parts[2]}-${parts[1]}-${parts[0]}`;
+    }
+    return dateString;
 }

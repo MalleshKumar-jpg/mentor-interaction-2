@@ -6,7 +6,7 @@ User* current_user = NULL;
 User* mentor_list[MAX_MENTORS] = {NULL};
 int mentor_count = 0;
 
-// Hash function
+//Hash table functions
 unsigned int hash(char* username) {
     unsigned int hash_value = 0;
     for (int i = 0; username[i] != '\0'; i++) {
