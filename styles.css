@@ -8,6 +8,11 @@
 body {
     font-family: Arial, sans-serif;
     background-color: #f4f4f9;
+    background-image: url('https://www.runsensible.com/wp-content/uploads/2024/07/The-Role-and-Importance-of-a-Legal-Mentor.jpg');
+    background-size: cover;
+    background-position: center; 
+    background-repeat: no-repeat;
+    background-attachment: fixed;
     color: #333;
     line-height: 1.6;
 }
@@ -92,7 +97,6 @@ button:hover {
     text-decoration: underline;
 }
 
-/* Dashboard */
 .dashboard-nav {
     display: flex;
     justify-content: space-between;
@@ -122,18 +126,20 @@ button:hover {
     display: flex;
     margin-bottom: 20px;
     border-bottom: 1px solid #ddd;
+    gap: 10px;
 }
 
 .tab-button {
-    padding: 10px 20px;
-    background-color: #f4f4f9;
+    padding: 10px 50px;
+    color : white;
     border: none;
     cursor: pointer;
     border-bottom: 3px solid transparent;
 }
 
 .tab-button.active {
-    border-bottom: 3px solid #3498db;
+    background-color: green;
+    color : white;
     font-weight: bold;
 }
 
@@ -150,7 +156,6 @@ button:hover {
     padding: 15px;
     margin-bottom: 10px;
     border-radius: 4px;
-    border-left: 4px solid #3498db;
 }
 
 .list-item h3 {
@@ -272,7 +277,6 @@ button:hover {
     background-color: #45a049;
 }
 
-/* Ensure modal can be scrolled */
 .modal {
     overflow-y: auto;
     max-height: 100vh;
