@@ -43,6 +43,15 @@ h2 {
     margin: 0 auto;
 }
 
+.dashboard-nav {
+    padding: 30px;
+    background-color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 20px;
+}
+
 .form-group {
     margin-bottom: 20px;
 }
