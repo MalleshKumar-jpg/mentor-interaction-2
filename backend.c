@@ -623,25 +623,24 @@ User** get_sorted_mentees(User* mentor, int* count) {
     return mentees;
 }
 
-
 void generate_sample_data() {
     // Create sample mentors
-    User* mentor1 = register_mentor("mentor1", "password", "John Smith", "john@example.com", "1234567890", "CSE");
-    User* mentor2 = register_mentor("mentor2", "password", "Jane Doe", "jane@example.com", "9876543210", "ECE");
+    User* mentor1 = register_mentor("rajan.kumar", "Mentor@2025", "Dr. Rajan Kumar", "rajan.kumar@ssn.edu.in", "9845671230", "CSE");
+    User* mentor2 = register_mentor("priya.sharma", "Faculty@2025", "Dr. Priya Sharma", "priya.sharma@ssn.edu.in", "7812345690", "ECE");
     
-    User* mentee1 = register_mentee("mentee1", "password", "Alice Johnson", "alice@example.com", "1112223333", "CSE", 2, "1234567", "1234567890123", "Alice's Parent", "parent1@example.com", "parent1@example.com", mentor1);
-    User* mentee2 = register_mentee("mentee2", "password", "Bob Brown", "bob@example.com", "4445556666", "IT", 3, "2345678", "2345678901234", "Bob's Parent", "parent2@example.com", "parent2@example.com", mentor1);
-    User* mentee3 = register_mentee("mentee3", "password", "Carol Wilson", "carol@example.com", "7778889999", "ECE", 1, "3456789", "3456789012345", "Carol's Parent", "parent3@example.com", "parent3@example.com", mentor2);
+    User* mentee1 = register_mentee("aditya.singh", "Student@2025", "Aditya Singh", "aditya.singh@ssn.edu.in", "9876543210", "CSE", 2, "2041012", "3122245001025", "Rajesh Singh", "rajesh.singh@gmail.com", "9812345670", mentor1);
+    User* mentee2 = register_mentee("kavya.patel", "Kavya@2025", "Kavya Patel", "kavya.patel@ssn.edu.in", "8765432109", "IT", 3, "2410391", "3122245001025", "Mahesh Patel", "mahesh.patel@gmail.com", "9756431280", mentor1);
+    User* mentee3 = register_mentee("vishnu.nair", "Vishnu@2025", "Vishnu Nair", "vishnu.nair@ssn.edu.in", "7654321098", "ECE", 1, "2024115", "3122245001025", "Suresh Nair", "suresh.nair@gmail.com", "9567842310", mentor2);
     
-    add_task(mentee1, "Read 2 books", "15-05-2025");
-    add_task(mentee1, "Walk 10 mins everyday", "20-05-2025");
-    add_task(mentee2, "practice your presentation in front of your mirror", "10-05-2025");
-    add_task(mentee3, "Practice presentation skills", "12-05-2025");
+    add_task(mentee1, "Read 'Atomic Habits' by James Clear", "15-05-2025");
+    add_task(mentee1, "Practice meditation for 10 minutes daily", "20-05-2025");
+    add_task(mentee2, "Practice public speaking in front of a mirror for 15 minutes daily", "10-05-2025");
+    add_task(mentee3, "Join at least one technical club on campus", "12-05-2025");
     
-    add_meeting_note(mentee1, "01-04-2025", "Discussed academic progress and future plans. Alice is doing well in programming courses but needs to improve time management skills.");
-    add_meeting_note(mentee1, "15-04-2025", "Reviewed assignment progress. Suggested additional resources for the upcoming project.");
-    add_meeting_note(mentee2, "02-04-2025", "First meeting with Bob. Discussed expectations and goals for the semester.");
-    add_meeting_note(mentee3, "05-04-2025", "Introduced Carol to department resources and discussed study strategies.");
+    add_meeting_note(mentee1, "01-04-2025", "Discussed personal growth goals. Aditya wants to improve time management and reading habits. Recommended starting with 'Atomic Habits' and using the Pomodoro technique for study sessions.");
+    add_meeting_note(mentee1, "15-04-2025", "Follow-up on personal development. Aditya has started meditation and reports better focus. Still struggling with consistent reading habit.");
+    add_meeting_note(mentee2, "02-04-2025", "First meeting with Kavya. She expressed anxiety about presentations. Suggested daily practice in front of mirror and joining the college debate club to build confidence.");
+    add_meeting_note(mentee3, "05-04-2025", "As a first-year student, Vishnu is feeling overwhelmed. Suggested joining a technical club to make friends with similar interests and build support network.");
     
     save_users_to_file();
 }
