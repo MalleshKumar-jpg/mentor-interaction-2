@@ -38,7 +38,18 @@
                 </div>
                 <div class="form-group">
                     <label for="department">Department:</label>
-                    <input type="text" id="department" name="department" required>
+                    <select id="department" name="department" required>
+                        <option value="">-- Select Department --</option>
+                        <option value="CSE">CSE</option>
+                        <option value="IT">IT</option>
+                        <option value="ECE">ECE</option>
+                        <option value="EEE">EEE</option>
+                        <option value="MECHANICAL">MECHANICAL</option>
+                        <option value="CHEMICAL">CHEMICAL</option>
+                        <option value="CIVIL">CIVIL</option>
+                        <option value="BME">BME</option>
+                        <option value="M.TECH CSE">M.TECH CSE</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label for="year">Year of Study:</label>
@@ -60,8 +71,18 @@
                     <small>Format: 13 digits</small>
                 </div>
                 <div class="form-group">
-                    <label for="parent-contact">Parent Contact:</label>
+                    <label for="parent-name">Parent's Name:</label>
+                    <input type="text" id="parent-name" name="parent-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="parent-email">Parent's Email:</label>
+                    <input type="email" id="parent-email" name="parent-email" required>
+                    <small>Format: example@domain.com</small>
+                </div>
+                <div class="form-group">
+                    <label for="parent-contact">Parent's Phone:</label>
                     <input type="text" id="parent-contact" name="parent-contact" required>
+                    <small>Format: 10 digits (e.g., 1234567890)</small>
                 </div>
                 <div class="form-group">
                     <label for="mentor">Select Mentor:</label>

@@ -316,7 +316,7 @@ User* register_mentor(char* username, char* password, char* name, char* email, c
     return NULL;
 }
 
-User* register_mentee(char* username, char* password, char* name, char* email, char* phone, char* department, int year, char* digital_id, char* registration_number, char* parent_contact, User* mentor) {
+User* register_mentee(char* username, char* password, char* name, char* email, char* phone, char* department, int year, char* digital_id, char* registration_number, char* parent_name, char* parent_email, char* parent_contact, User* mentor) {
     
     User* mentee = (User*)malloc(sizeof(User));
     if (!mentee) {
@@ -333,7 +333,9 @@ User* register_mentee(char* username, char* password, char* name, char* email, c
     mentee->data.mentee_data.year = year;
     strncpy(mentee->data.mentee_data.digital_id, digital_id, MAX_DIGITAL_ID_LENGTH);
     strncpy(mentee->data.mentee_data.registration_number, registration_number, MAX_REG_NUMBER_LENGTH);
-    strncpy(mentee->data.mentee_data.parent_contact, parent_contact, MAX_PARENT_CONTACT_LENGTH);
+    strncpy(mentee->data.mentee_data.parent_name, parent_name, MAX_NAME_LENGTH);
+    strncpy(mentee->data.mentee_data.parent_email, parent_email, MAX_EMAIL_LENGTH);
+    strncpy(mentee->data.mentee_data.parent_contact, parent_contact, MAX_PHONE_LENGTH);
     mentee->data.mentee_data.tasks = NULL;
     mentee->data.mentee_data.meeting_notes = NULL;
     mentee->data.mentee_data.mentor = mentor;
@@ -341,7 +343,7 @@ User* register_mentee(char* username, char* password, char* name, char* email, c
     
     if (add_user(mentee)) {
         // Add mentee to mentor's BST
-      mentor->data.mentor_data.mentees_bst_root = insert_bst_node(mentor->data.mentor_data.mentees_bst_root, mentee);
+        mentor->data.mentor_data.mentees_bst_root = insert_bst_node(mentor->data.mentor_data.mentees_bst_root, mentee);
         return mentee;
     }
     
@@ -349,7 +351,7 @@ User* register_mentee(char* username, char* password, char* name, char* email, c
     return NULL;
 }
 
-bool update_mentee_info(User* mentee, char* name, char* email, char* phone, char* department, int year, char* digital_id, char* registration_number, char* parent_contact) {
+bool update_mentee_info(User* mentee, char* name, char* email, char* phone, char* department, int year, char* digital_id, char* registration_number, char* parent_name, char* parent_email, char* parent_contact) {
     
     strncpy(mentee->name, name, MAX_NAME_LENGTH);
     strncpy(mentee->email, email, MAX_EMAIL_LENGTH);
@@ -358,13 +360,13 @@ bool update_mentee_info(User* mentee, char* name, char* email, char* phone, char
     mentee->data.mentee_data.year = year;
     strncpy(mentee->data.mentee_data.digital_id, digital_id, MAX_DIGITAL_ID_LENGTH);
     strncpy(mentee->data.mentee_data.registration_number, registration_number, MAX_REG_NUMBER_LENGTH);
-    strncpy(mentee->data.mentee_data.parent_contact, parent_contact, MAX_PARENT_CONTACT_LENGTH);
+    strncpy(mentee->data.mentee_data.parent_name, parent_name, MAX_NAME_LENGTH);
+    strncpy(mentee->data.mentee_data.parent_email, parent_email, MAX_EMAIL_LENGTH);
+    strncpy(mentee->data.mentee_data.parent_contact, parent_contact, MAX_PHONE_LENGTH);
     
     return true;
 }
-
 //File handling functions
-
 void save_users_to_file() {
     FILE* file = fopen("users.dat", "wb");
     if (!file) {
@@ -388,7 +390,9 @@ void save_users_to_file() {
                 fwrite(&user->data.mentee_data.year, sizeof(int), 1, file);
                 fwrite(user->data.mentee_data.digital_id, sizeof(char), MAX_DIGITAL_ID_LENGTH, file);
                 fwrite(user->data.mentee_data.registration_number, sizeof(char), MAX_REG_NUMBER_LENGTH, file);
-                fwrite(user->data.mentee_data.parent_contact, sizeof(char), MAX_PARENT_CONTACT_LENGTH, file);
+                fwrite(user->data.mentee_data.parent_name, sizeof(char), MAX_NAME_LENGTH, file);
+                fwrite(user->data.mentee_data.parent_email, sizeof(char), MAX_EMAIL_LENGTH, file);
+                fwrite(user->data.mentee_data.parent_contact, sizeof(char), MAX_PHONE_LENGTH, file);
                 
                 // Save mentor username
                 char mentor_username[MAX_USERNAME_LENGTH] = {0};
@@ -487,7 +491,9 @@ void load_users_from_file() {
             fread(&user->data.mentee_data.year, sizeof(int), 1, file);
             fread(user->data.mentee_data.digital_id, sizeof(char), MAX_DIGITAL_ID_LENGTH, file);
             fread(user->data.mentee_data.registration_number, sizeof(char), MAX_REG_NUMBER_LENGTH, file);
-            fread(user->data.mentee_data.parent_contact, sizeof(char), MAX_PARENT_CONTACT_LENGTH, file);
+            fread(user->data.mentee_data.parent_name, sizeof(char), MAX_NAME_LENGTH, file);
+            fread(user->data.mentee_data.parent_email, sizeof(char), MAX_EMAIL_LENGTH, file);
+            fread(user->data.mentee_data.parent_contact, sizeof(char), MAX_PHONE_LENGTH, file);
             
             // Read mentor username
             char mentor_username[MAX_USERNAME_LENGTH];
@@ -622,9 +628,9 @@ void generate_sample_data() {
     User* mentor1 = register_mentor("mentor1", "password", "John Smith", "john@example.com", "1234567890", "Computer Science");
     User* mentor2 = register_mentor("mentor2", "password", "Jane Doe", "jane@example.com", "9876543210", "Mathematics");
     
-    User* mentee1 = register_mentee("mentee1", "password", "Alice Johnson", "alice@example.com", "1112223333", "Computer Science", 2, "1234567", "1234567890123", "parent1@example.com", mentor1);
-    User* mentee2 = register_mentee("mentee2", "password", "Bob Brown", "bob@example.com", "4445556666", "Mathematics", 3, "2345678", "2345678901234", "parent2@example.com", mentor1);
-   User* mentee3 = register_mentee("mentee3", "password", "Carol Wilson", "carol@example.com", "7778889999", "Computer Science", 1, "3456789", "3456789012345", "parent3@example.com", mentor2);
+    User* mentee1 = register_mentee("mentee1", "password", "Alice Johnson", "alice@example.com", "1112223333", "Computer Science", 2, "1234567", "1234567890123", "Robert Johnson", "robert@example.com", "parent1@example.com", mentor1);
+    User* mentee2 = register_mentee("mentee2", "password", "Bob Brown", "bob@example.com", "4445556666", "Mathematics", 3, "2345678", "2345678901234", "Mary Brown", "mary@example.com", "parent2@example.com", mentor1);
+    User* mentee3 = register_mentee("mentee3", "password", "Carol Wilson", "carol@example.com", "7778889999", "Computer Science", 1, "3456789", "3456789012345", "Thomas Wilson", "thomas@example.com", "parent3@example.com", mentor2);
    
    add_task(mentee1, "Read 2 books", "15-05-2025");
    add_task(mentee1, "Walk 10 mins everyday", "20-05-2025");
@@ -675,32 +681,32 @@ User* api_register_mentor(char* username, char* password, char* name, char* emai
    return mentor;
 }
 
-User* api_register_mentee(char* username, char* password, char* name, char* email, char* phone, char* department, int year, char* digital_id, char* registration_number, char* parent_contact, char* mentor_username) {
-   User* mentor = find_user(mentor_username);
-   if (!mentor || mentor->role != MENTOR) {
-       return NULL;
-   }
-   
-   User* mentee = register_mentee(username, password, name, email, phone, department, year, 
-                                digital_id, registration_number, parent_contact, mentor);
-   if (mentee) {
-       save_users_to_file();
-   }
-   return mentee;
-}
-
-bool api_update_mentee_info(char* username, char* name, char* email, char* phone, char* department, int year, char* digital_id, char* registration_number, char* parent_contact) {
-   User* mentee = find_user(username);
-   if (!mentee || mentee->role != MENTEE) {
-       return false;
-   }
-   
-   bool success = update_mentee_info(mentee, name, email, phone, department, year, digital_id, registration_number, parent_contact);
-   if (success) {
-       save_users_to_file();
-   }
-   return success;
-}
+User* api_register_mentee(char* username, char* password, char* name, char* email, char* phone, char* department, int year, char* digital_id, char* registration_number, char* parent_name, char* parent_email, char* parent_contact, char* mentor_username) {
+    User* mentor = find_user(mentor_username);
+    if (!mentor || mentor->role != MENTOR) {
+        return NULL;
+    }
+    
+    User* mentee = register_mentee(username, password, name, email, phone, department, year, 
+                                 digital_id, registration_number, parent_name, parent_email, parent_contact, mentor);
+    if (mentee) {
+        save_users_to_file();
+    }
+    return mentee;
+ }
+ 
+ bool api_update_mentee_info(char* username, char* name, char* email, char* phone, char* department, int year, char* digital_id, char* registration_number, char* parent_name, char* parent_email, char* parent_contact) {
+    User* mentee = find_user(username);
+    if (!mentee || mentee->role != MENTEE) {
+        return false;
+    }
+    
+    bool success = update_mentee_info(mentee, name, email, phone, department, year, digital_id, registration_number, parent_name, parent_email, parent_contact);
+    if (success) {
+        save_users_to_file();
+    }
+    return success;
+ }
 
 bool api_add_task(char* mentee_username, char* description, char* due_date) {
    User* mentee = find_user(mentee_username);

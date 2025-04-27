@@ -254,66 +254,72 @@
           
           send_response(client_fd, 200, "application/json", response);
          }else if (strcmp(endpoint, "register_mentee") == 0 && strcmp(method, "POST") == 0) {
-             // Parse mentee registration payload
-             char username[MAX_USERNAME_LENGTH] = {0};
-             char password[MAX_PASSWORD_LENGTH] = {0};
-             char name[MAX_NAME_LENGTH] = {0};
-             char email[MAX_EMAIL_LENGTH] = {0};
-             char phone[MAX_PHONE_LENGTH] = {0};
-             char department[MAX_DEPARTMENT_LENGTH] = {0};
-             int year = 1;
-             char digitalId[MAX_DIGITAL_ID_LENGTH] = {0};
-             char registrationNumber[MAX_REG_NUMBER_LENGTH] = {0};
-             char parentContact[MAX_PARENT_CONTACT_LENGTH] = {0};
-             char mentorUsername[MAX_USERNAME_LENGTH] = {0};
-             
-             // Extract parameters
-             char* params[20][2];
-             int param_count;
-             parse_query_string(payload, params, &param_count);
-             
-             for (int i = 0; i < param_count; i++) {
-                 char decoded[MAX_NAME_LENGTH];
-                 url_decode(decoded, params[i][1]);
-                 
-                 if (strcmp(params[i][0], "username") == 0) {
-                     strncpy(username, decoded, MAX_USERNAME_LENGTH);
-                 } else if (strcmp(params[i][0], "password") == 0) {
-                     strncpy(password, decoded, MAX_PASSWORD_LENGTH);
-                 } else if (strcmp(params[i][0], "name") == 0) {
-                     strncpy(name, decoded, MAX_NAME_LENGTH);
-                 } else if (strcmp(params[i][0], "email") == 0) {
-                     strncpy(email, decoded, MAX_EMAIL_LENGTH);
-                 } else if (strcmp(params[i][0], "phone") == 0) {
-                     strncpy(phone, decoded, MAX_PHONE_LENGTH);
-                 } else if (strcmp(params[i][0], "department") == 0) {
-                     strncpy(department, decoded, MAX_DEPARTMENT_LENGTH);
-                 } else if (strcmp(params[i][0], "year") == 0) {
-                     year = atoi(decoded);
-                 } else if (strcmp(params[i][0], "digitalId") == 0) {
-                     strncpy(digitalId, decoded, MAX_DIGITAL_ID_LENGTH);
-                 } else if (strcmp(params[i][0], "registrationNumber") == 0) {
-                     strncpy(registrationNumber, decoded, MAX_REG_NUMBER_LENGTH);
-                 } else if (strcmp(params[i][0], "parentContact") == 0) {
-                     strncpy(parentContact, decoded, MAX_PARENT_CONTACT_LENGTH);
-                 } else if (strcmp(params[i][0], "mentorUsername") == 0) {
-                     strncpy(mentorUsername, decoded, MAX_USERNAME_LENGTH);
-                 }
-             }
-             
-             // Print debug info
-             printf("Registering mentee: %s with mentor: %s\n", username, mentorUsername);
-             
-             User* mentee = api_register_mentee(username, password, name, email, phone, department, 
-                                              year, digitalId, registrationNumber, parentContact, mentorUsername);
-             if (mentee) {
-                 sprintf(response, "{\"success\": true, \"username\": \"%s\"}", mentee->username);
-             } else {
-                 sprintf(response, "{\"success\": false, \"message\": \"Registration failed. Make sure all fields are valid and the mentor exists.\"}");
-             }
-             
-             send_response(client_fd, 200, "application/json", response);
-         }else if (strcmp(endpoint, "mentors") == 0 && strcmp(method, "GET") == 0) {
+            // Parse mentee registration payload
+            char username[MAX_USERNAME_LENGTH] = {0};
+            char password[MAX_PASSWORD_LENGTH] = {0};
+            char name[MAX_NAME_LENGTH] = {0};
+            char email[MAX_EMAIL_LENGTH] = {0};
+            char phone[MAX_PHONE_LENGTH] = {0};
+            char department[MAX_DEPARTMENT_LENGTH] = {0};
+            int year = 1;
+            char digitalId[MAX_DIGITAL_ID_LENGTH] = {0};
+            char registrationNumber[MAX_REG_NUMBER_LENGTH] = {0};
+            char parentName[MAX_NAME_LENGTH] = {0};
+            char parentEmail[MAX_EMAIL_LENGTH] = {0};
+            char parentContact[MAX_PHONE_LENGTH] = {0};
+            char mentorUsername[MAX_USERNAME_LENGTH] = {0};
+            
+            // Extract parameters
+            char* params[20][2];
+            int param_count;
+            parse_query_string(payload, params, &param_count);
+            
+            for (int i = 0; i < param_count; i++) {
+                char decoded[MAX_NAME_LENGTH];
+                url_decode(decoded, params[i][1]);
+                
+                if (strcmp(params[i][0], "username") == 0) {
+                    strncpy(username, decoded, MAX_USERNAME_LENGTH);
+                } else if (strcmp(params[i][0], "password") == 0) {
+                    strncpy(password, decoded, MAX_PASSWORD_LENGTH);
+                } else if (strcmp(params[i][0], "name") == 0) {
+                    strncpy(name, decoded, MAX_NAME_LENGTH);
+                } else if (strcmp(params[i][0], "email") == 0) {
+                    strncpy(email, decoded, MAX_EMAIL_LENGTH);
+                } else if (strcmp(params[i][0], "phone") == 0) {
+                    strncpy(phone, decoded, MAX_PHONE_LENGTH);
+                } else if (strcmp(params[i][0], "department") == 0) {
+                    strncpy(department, decoded, MAX_DEPARTMENT_LENGTH);
+                } else if (strcmp(params[i][0], "year") == 0) {
+                    year = atoi(decoded);
+                } else if (strcmp(params[i][0], "digitalId") == 0) {
+                    strncpy(digitalId, decoded, MAX_DIGITAL_ID_LENGTH);
+                } else if (strcmp(params[i][0], "registrationNumber") == 0) {
+                    strncpy(registrationNumber, decoded, MAX_REG_NUMBER_LENGTH);
+                } else if (strcmp(params[i][0], "parentName") == 0) {
+                    strncpy(parentName, decoded, MAX_NAME_LENGTH);
+                } else if (strcmp(params[i][0], "parentEmail") == 0) {
+                    strncpy(parentEmail, decoded, MAX_EMAIL_LENGTH);
+                } else if (strcmp(params[i][0], "parentContact") == 0) {
+                    strncpy(parentContact, decoded, MAX_PHONE_LENGTH);
+                } else if (strcmp(params[i][0], "mentorUsername") == 0) {
+                    strncpy(mentorUsername, decoded, MAX_USERNAME_LENGTH);
+                }
+            }
+            
+            // Print debug info
+            printf("Registering mentee: %s with mentor: %s\n", username, mentorUsername);
+            
+            User* mentee = api_register_mentee(username, password, name, email, phone, department, 
+                                             year, digitalId, registrationNumber, parentName, parentEmail, parentContact, mentorUsername);
+            if (mentee) {
+                sprintf(response, "{\"success\": true, \"username\": \"%s\"}", mentee->username);
+            } else {
+                sprintf(response, "{\"success\": false, \"message\": \"Registration failed. Make sure all fields are valid and the mentor exists.\"}");
+            }
+            
+            send_response(client_fd, 200, "application/json", response);
+        }else if (strcmp(endpoint, "mentors") == 0 && strcmp(method, "GET") == 0) {
              int count = 0;
              User** mentors = api_get_mentors(&count);
              
@@ -484,26 +490,30 @@
                      
                      // Build the JSON response
                      sprintf(response, 
-                             "{\"success\": true, \"profile\": {"
-                             "\"name\": \"%s\", "
-                             "\"email\": \"%s\", "
-                             "\"phone\": \"%s\", "
-                             "\"department\": \"%s\", "
-                             "\"year\": %d, "
-                             "\"digitalId\": \"%s\", "
-                             "\"registrationNumber\": \"%s\", "
-                             "\"parentContact\": \"%s\", "
-                             "\"mentorName\": \"%s\""
-                             "}}",
-                             user->name,
-                             user->email,
-                             user->phone,
-                             user->department,
-                             user->data.mentee_data.year,
-                             user->data.mentee_data.digital_id,
-                             user->data.mentee_data.registration_number,
-                             user->data.mentee_data.parent_contact,
-                             mentor_name);
+                        "{\"success\": true, \"profile\": {"
+                        "\"name\": \"%s\", "
+                        "\"email\": \"%s\", "
+                        "\"phone\": \"%s\", "
+                        "\"department\": \"%s\", "
+                        "\"year\": %d, "
+                        "\"digitalId\": \"%s\", "
+                        "\"registrationNumber\": \"%s\", "
+                        "\"parentName\": \"%s\", "
+                        "\"parentEmail\": \"%s\", "
+                        "\"parentContact\": \"%s\", "
+                        "\"mentorName\": \"%s\""
+                        "}}",
+                        user->name,
+                        user->email,
+                        user->phone,
+                        user->department,
+                        user->data.mentee_data.year,
+                        user->data.mentee_data.digital_id,
+                        user->data.mentee_data.registration_number,
+                        user->data.mentee_data.parent_name,
+                        user->data.mentee_data.parent_email,
+                        user->data.mentee_data.parent_contact,
+                        mentor_name);
                  } else if (user && user->role == MENTOR) {
                      // Build the JSON response for mentor
                      sprintf(response, 
@@ -525,63 +535,66 @@
              }
              
              send_response(client_fd, 200, "application/json", response);
-         }
-         // Add other API endpoints for update_profile, add_task, delete_task, etc.
-         else if (strcmp(endpoint, "update_profile") == 0 && strcmp(method, "POST") == 0) {
-             // Parse payload
-             char username[MAX_USERNAME_LENGTH] = {0};
-             char name[MAX_NAME_LENGTH] = {0};
-             char email[MAX_EMAIL_LENGTH] = {0};
-             char phone[MAX_PHONE_LENGTH] = {0};
-             char department[MAX_DEPARTMENT_LENGTH] = {0};
-             int year = 1;
-             char digitalId[MAX_DIGITAL_ID_LENGTH] = {0};
-             char registrationNumber[MAX_REG_NUMBER_LENGTH] = {0};
-             char parentContact[MAX_PARENT_CONTACT_LENGTH] = {0};
-             
-             // Extract parameters
-             char* params[20][2];
-             int param_count;
-             parse_query_string(payload, params, &param_count);
-             
-             for (int i = 0; i < param_count; i++) {
-                 char decoded[MAX_NAME_LENGTH];
-                 url_decode(decoded, params[i][1]);
-                 
-                 if (strcmp(params[i][0], "username") == 0) {
-                     strncpy(username, decoded, MAX_USERNAME_LENGTH);
-                 } else if (strcmp(params[i][0], "name") == 0) {
-                     strncpy(name, decoded, MAX_NAME_LENGTH);
-                 } else if (strcmp(params[i][0], "email") == 0) {
-                     strncpy(email, decoded, MAX_EMAIL_LENGTH);
-                 } else if (strcmp(params[i][0], "phone") == 0) {
-                     strncpy(phone, decoded, MAX_PHONE_LENGTH);
-                 } else if (strcmp(params[i][0], "department") == 0) {
-                     strncpy(department, decoded, MAX_DEPARTMENT_LENGTH);
-                 } else if (strcmp(params[i][0], "year") == 0) {
-                     year = atoi(decoded);
-                 } else if (strcmp(params[i][0], "digitalId") == 0) {
-                     strncpy(digitalId, decoded, MAX_DIGITAL_ID_LENGTH);
-                 } else if (strcmp(params[i][0], "registrationNumber") == 0) {
-                     strncpy(registrationNumber, decoded, MAX_REG_NUMBER_LENGTH);
-                 } else if (strcmp(params[i][0], "parentContact") == 0) {
-                     strncpy(parentContact, decoded, MAX_PARENT_CONTACT_LENGTH);
-                 }
-             }
-             
-             // Update profile
-             bool success = api_update_mentee_info(username, name, email, phone, department, 
-                                                  year, digitalId, registrationNumber, parentContact);
-             
-             if (success) {
-                 sprintf(response, "{\"success\": true}");
-             } else {
-                 sprintf(response, "{\"success\": false, \"message\": \"Failed to update profile\"}");
-             }
-             
-             send_response(client_fd, 200, "application/json", response);
-         }
-         else if (strcmp(endpoint, "add_task") == 0 && strcmp(method, "POST") == 0) {
+         }else if (strcmp(endpoint, "update_profile") == 0 && strcmp(method, "POST") == 0) {
+            // Parse payload
+            char username[MAX_USERNAME_LENGTH] = {0};
+            char name[MAX_NAME_LENGTH] = {0};
+            char email[MAX_EMAIL_LENGTH] = {0};
+            char phone[MAX_PHONE_LENGTH] = {0};
+            char department[MAX_DEPARTMENT_LENGTH] = {0};
+            int year = 1;
+            char digitalId[MAX_DIGITAL_ID_LENGTH] = {0};
+            char registrationNumber[MAX_REG_NUMBER_LENGTH] = {0};
+            char parentName[MAX_NAME_LENGTH] = {0};
+            char parentEmail[MAX_EMAIL_LENGTH] = {0};
+            char parentContact[MAX_PHONE_LENGTH] = {0};
+            
+            // Extract parameters
+            char* params[20][2];
+            int param_count;
+            parse_query_string(payload, params, &param_count);
+            
+            for (int i = 0; i < param_count; i++) {
+                char decoded[MAX_NAME_LENGTH];
+                url_decode(decoded, params[i][1]);
+                
+                if (strcmp(params[i][0], "username") == 0) {
+                    strncpy(username, decoded, MAX_USERNAME_LENGTH);
+                } else if (strcmp(params[i][0], "name") == 0) {
+                    strncpy(name, decoded, MAX_NAME_LENGTH);
+                } else if (strcmp(params[i][0], "email") == 0) {
+                    strncpy(email, decoded, MAX_EMAIL_LENGTH);
+                } else if (strcmp(params[i][0], "phone") == 0) {
+                    strncpy(phone, decoded, MAX_PHONE_LENGTH);
+                } else if (strcmp(params[i][0], "department") == 0) {
+                    strncpy(department, decoded, MAX_DEPARTMENT_LENGTH);
+                } else if (strcmp(params[i][0], "year") == 0) {
+                    year = atoi(decoded);
+                } else if (strcmp(params[i][0], "digitalId") == 0) {
+                    strncpy(digitalId, decoded, MAX_DIGITAL_ID_LENGTH);
+                } else if (strcmp(params[i][0], "registrationNumber") == 0) {
+                    strncpy(registrationNumber, decoded, MAX_REG_NUMBER_LENGTH);
+                } else if (strcmp(params[i][0], "parentName") == 0) {
+                    strncpy(parentName, decoded, MAX_NAME_LENGTH);
+                } else if (strcmp(params[i][0], "parentEmail") == 0) {
+                    strncpy(parentEmail, decoded, MAX_EMAIL_LENGTH);
+                } else if (strcmp(params[i][0], "parentContact") == 0) {
+                    strncpy(parentContact, decoded, MAX_PHONE_LENGTH);
+                }
+            }
+            
+            // Update profile
+            bool success = api_update_mentee_info(username, name, email, phone, department, 
+                                                 year, digitalId, registrationNumber, parentName, parentEmail, parentContact);
+            
+            if (success) {
+                sprintf(response, "{\"success\": true}");
+            } else {
+                sprintf(response, "{\"success\": false, \"message\": \"Failed to update profile\"}");
+            }
+            
+            send_response(client_fd, 200, "application/json", response);
+        }else if (strcmp(endpoint, "add_task") == 0 && strcmp(method, "POST") == 0) {
              // Add task endpoint implementation
              char mentee[MAX_USERNAME_LENGTH] = {0};
              char description[MAX_DESCRIPTION_LENGTH] = {0};
@@ -614,10 +627,7 @@
              }
              
              send_response(client_fd, 200, "application/json", response);
-         }// Missing API endpoints that need to be implemented in server.c
- 
- // 1. Meetings endpoint implementation
- else if (strncmp(endpoint, "meetings", 8) == 0 && strcmp(method, "GET") == 0) {
+         }else if (strncmp(endpoint, "meetings", 8) == 0 && strcmp(method, "GET") == 0) {
      // Parse query parameter for mentee username
      char mentee_username[MAX_USERNAME_LENGTH] = {0};
      char* query_start = strchr(path, '?');

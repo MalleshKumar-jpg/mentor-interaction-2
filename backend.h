@@ -6,7 +6,6 @@
 #include <string.h>
 #include <stdbool.h>
 
-// Constants
 #define MAX_USERNAME_LENGTH 50
 #define MAX_PASSWORD_LENGTH 50
 #define MAX_NAME_LENGTH 100
@@ -18,7 +17,6 @@
 #define MAX_DATE_LENGTH 11  
 #define MAX_DIGITAL_ID_LENGTH 10
 #define MAX_REG_NUMBER_LENGTH 15
-#define MAX_PARENT_CONTACT_LENGTH 100
 #define HASH_TABLE_SIZE 1000
 #define MAX_MENTORS 100
 
@@ -65,7 +63,9 @@ typedef struct User {
             int year;
             char digital_id[MAX_DIGITAL_ID_LENGTH];
             char registration_number[MAX_REG_NUMBER_LENGTH];
-            char parent_contact[MAX_PARENT_CONTACT_LENGTH];
+            char parent_name[MAX_NAME_LENGTH];
+            char parent_email[MAX_EMAIL_LENGTH];
+            char parent_contact[MAX_PHONE_LENGTH];
             struct Task* tasks;
             struct Meeting_note* meeting_notes;
             struct User* mentor;
@@ -85,8 +85,8 @@ User* find_user(char* username);
 User* api_login(char* username, char* password);
 void api_logout();
 User* api_register_mentor(char* username, char* password, char* name, char* email, char* phone, char* department);
-User* api_register_mentee(char* username, char* password, char* name, char* email, char* phone, char* department, int year, char* digital_id, char* registration_number, char* parent_contact, char* mentor_username);
-bool api_update_mentee_info(char* username, char* name, char* email, char* phone, char* department, int year, char* digital_id, char* registration_number, char* parent_contact);
+User* api_register_mentee(char* username, char* password, char* name, char* email, char* phone, char* department, int year, char* digital_id, char* registration_number, char* parent_name, char* parent_email, char* parent_contact, char* mentor_username);
+bool api_update_mentee_info(char* username, char* name, char* email, char* phone, char* department, int year, char* digital_id, char* registration_number, char* parent_name, char* parent_email, char* parent_contact);
 bool api_add_task(char* mentee_username, char* description, char* due_date);
 bool api_delete_task(char* mentee_username, int task_index);
 bool api_add_meeting_note(char* mentee_username, char* date, char* summary);

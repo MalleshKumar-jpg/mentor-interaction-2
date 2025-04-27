@@ -899,7 +899,9 @@ async function loadProfile() {
                     <p><strong>Year:</strong> ${profile.year}</p>
                     <p><strong>Digital ID:</strong> ${profile.digitalId}</p>
                     <p><strong>Registration Number:</strong> ${profile.registrationNumber}</p>
-                    <p><strong>Parent Contact:</strong> ${profile.parentContact}</p>
+                    <p><strong>Parent's Name:</strong> ${profile.parentName}</p>
+                    <p><strong>Parent's Email:</strong> ${profile.parentEmail}</p>
+                    <p><strong>Parent's Phone:</strong> ${profile.parentContact}</p>
                     <p><strong>Mentor:</strong> ${profile.mentorName}</p>
                 </div>
             `;
@@ -916,6 +918,8 @@ async function loadProfile() {
                 document.getElementById("edit-year").value = profile.year;
                 document.getElementById("edit-digital-id").value = profile.digitalId;
                 document.getElementById("edit-registration-number").value = profile.registrationNumber;
+                document.getElementById("edit-parent-name").value = profile.parentName;
+                document.getElementById("edit-parent-email").value = profile.parentEmail;
                 document.getElementById("edit-parent-contact").value = profile.parentContact;
                 
                 // Set up form submission
@@ -930,9 +934,11 @@ async function loadProfile() {
                     const year = document.getElementById("edit-year").value;
                     const digitalId = document.getElementById("edit-digital-id").value;
                     const registrationNumber = document.getElementById("edit-registration-number").value;
+                    const parentName = document.getElementById("edit-parent-name").value;
+                    const parentEmail = document.getElementById("edit-parent-email").value;
                     const parentContact = document.getElementById("edit-parent-contact").value;
                     
-                    updateProfile(name, email, phone, department, year, digitalId, registrationNumber, parentContact);
+                    updateProfile(name, email, phone, department, year, digitalId, registrationNumber, parentName, parentEmail, parentContact);
                 });
             });
         } else {
@@ -944,7 +950,7 @@ async function loadProfile() {
 }
 
 // Update profile
-async function updateProfile(name, email, phone, department, year, digitalId, registrationNumber, parentContact) {
+async function updateProfile(name, email, phone, department, year, digitalId, registrationNumber, parentName, parentEmail, parentContact) {
     try {
         if (!validateName(name)) {
             showError("Invalid name format. Name should start with a letter and contain only letters, spaces, and periods.");
@@ -971,6 +977,16 @@ async function updateProfile(name, email, phone, department, year, digitalId, re
             return;
         }
         
+        if (!validateName(parentName)) {
+            showError("Invalid parent name format. Parent name should start with a letter and contain only letters, spaces, and periods.");
+            return;
+        }
+        
+        if (!validateEmail(parentEmail)) {
+            showError("Invalid parent email format. Please provide a valid email address.");
+            return;
+        }
+        
         if (!validateParentContact(parentContact)) {
             showError("Invalid Parent Contact. Please provide a valid email or 10-digit phone number.");
             return;
@@ -986,6 +1002,7 @@ async function updateProfile(name, email, phone, department, year, digitalId, re
                   `phone=${encodeURIComponent(phone)}&department=${encodeURIComponent(department)}&` +
                   `year=${encodeURIComponent(year)}&digitalId=${encodeURIComponent(digitalId)}&` +
                   `registrationNumber=${encodeURIComponent(registrationNumber)}&` +
+                  `parentName=${encodeURIComponent(parentName)}&parentEmail=${encodeURIComponent(parentEmail)}&` +
                   `parentContact=${encodeURIComponent(parentContact)}`
         });
         
