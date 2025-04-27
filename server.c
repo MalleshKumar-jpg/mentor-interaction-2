@@ -462,80 +462,78 @@
              }
              
              send_response(client_fd, 200, "application/json", response);
-         }
-         // FIX: This needs to be a separate else-if block, not nested inside the tasks endpoint
-         else if (strncmp(endpoint, "profile", 7) == 0 && strcmp(method, "GET") == 0) {
-             // Parse query parameter for username
-             char username[MAX_USERNAME_LENGTH] = {0};
-             char* query_start = strchr(path, '?');
-             
-             if (query_start) {
-                 if (strncmp(query_start + 1, "username=", 9) == 0) {
-                     strncpy(username, query_start + 10, MAX_USERNAME_LENGTH - 1);
-                     // If there are additional parameters, cut them off
-                     char* amp = strchr(username, '&');
-                     if (amp) *amp = '\0';
-                 }
-             }
-             
-             if (strlen(username) > 0) {
-                 User* user = find_user(username);
-                 
-                 if (user && user->role == MENTEE) {
-                     // Get mentor name
-                     char mentor_name[MAX_NAME_LENGTH] = "None";
-                     if (user->data.mentee_data.mentor) {
-                         strncpy(mentor_name, user->data.mentee_data.mentor->name, MAX_NAME_LENGTH);
-                     }
-                     
-                     // Build the JSON response
-                     sprintf(response, 
-                        "{\"success\": true, \"profile\": {"
-                        "\"name\": \"%s\", "
-                        "\"email\": \"%s\", "
-                        "\"phone\": \"%s\", "
-                        "\"department\": \"%s\", "
-                        "\"year\": %d, "
-                        "\"digitalId\": \"%s\", "
-                        "\"registrationNumber\": \"%s\", "
-                        "\"parentName\": \"%s\", "
-                        "\"parentEmail\": \"%s\", "
-                        "\"parentContact\": \"%s\", "
-                        "\"mentorName\": \"%s\""
-                        "}}",
-                        user->name,
-                        user->email,
-                        user->phone,
-                        user->department,
-                        user->data.mentee_data.year,
-                        user->data.mentee_data.digital_id,
-                        user->data.mentee_data.registration_number,
-                        user->data.mentee_data.parent_name,
-                        user->data.mentee_data.parent_email,
-                        user->data.mentee_data.parent_contact,
-                        mentor_name);
-                 } else if (user && user->role == MENTOR) {
-                     // Build the JSON response for mentor
-                     sprintf(response, 
-                             "{\"success\": true, \"profile\": {"
-                             "\"name\": \"%s\", "
-                             "\"email\": \"%s\", "
-                             "\"phone\": \"%s\", "
-                             "\"department\": \"%s\""
-                             "}}",
-                             user->name,
-                             user->email,
-                             user->phone,
-                             user->department);
-                 } else {
-                     sprintf(response, "{\"success\": false, \"message\": \"User not found\"}");
-                 }
-             } else {
-                 sprintf(response, "{\"success\": false, \"message\": \"Missing username parameter\"}");
-             }
-             
-             send_response(client_fd, 200, "application/json", response);
-         }else if (strcmp(endpoint, "update_profile") == 0 && strcmp(method, "POST") == 0) {
+         }else if (strncmp(endpoint, "profile", 7) == 0 && strcmp(method, "GET") == 0) {
+            // Parse query parameter for username
+            char username[MAX_USERNAME_LENGTH] = {0};
+            char* query_start = strchr(path, '?');
+            
+            if (query_start) {
+                if (strncmp(query_start + 1, "username=", 9) == 0) {
+                    strncpy(username, query_start + 10, MAX_USERNAME_LENGTH - 1);
+                    // If there are additional parameters, cut them off
+                    char* amp = strchr(username, '&');
+                    if (amp) *amp = '\0';
+                }
+            }
+            
+            if (strlen(username) > 0) {
+                User* user = find_user(username);
+                
+                if (user && user->role == MENTEE) {
+                    // Get mentor name
+                    char mentor_name[MAX_NAME_LENGTH] = "None";
+                    if (user->data.mentee_data.mentor) {
+                        strncpy(mentor_name, user->data.mentee_data.mentor->name, MAX_NAME_LENGTH);
+                    }
+                    
+                    // Build the JSON response
+                    sprintf(response, 
+                            "{\"success\": true, \"profile\": {"
+                            "\"name\": \"%s\", "
+                            "\"email\": \"%s\", "
+                            "\"phone\": \"%s\", "
+                            "\"department\": \"%s\", "
+                            "\"year\": %d, "
+                            "\"digitalId\": \"%s\", "
+                            "\"registrationNumber\": \"%s\", "
+                            "\"parentName\": \"%s\", "
+                            "\"parentEmail\": \"%s\", "
+                            "\"parentContact\": \"%s\", "
+                            "\"mentorName\": \"%s\""
+                            "}}",
+                            user->name,
+                            user->email,
+                            user->phone,
+                            user->department,
+                            user->data.mentee_data.year,
+                            user->data.mentee_data.digital_id,
+                            user->data.mentee_data.registration_number,
+                            user->data.mentee_data.parent_name,
+                            user->data.mentee_data.parent_email,
+                            user->data.mentee_data.parent_contact,
+                            mentor_name);
+                } else if (user && user->role == MENTOR) {
+                    // Build the JSON response for mentor
+                    sprintf(response, 
+                            "{\"success\": true, \"profile\": {"
+                            "\"name\": \"%s\", "
+                            "\"email\": \"%s\", "
+                            "\"phone\": \"%s\", "
+                            "\"department\": \"%s\""
+                            "}}",
+                            user->name,
+                            user->email,
+                            user->phone,
+                            user->department);
+                } else {
+                    sprintf(response, "{\"success\": false, \"message\": \"User not found\"}");
+                }
+            } else {
+                sprintf(response, "{\"success\": false, \"message\": \"Missing username parameter\"}");
+            }
+            
+            send_response(client_fd, 200, "application/json", response);
+        }else if (strcmp(endpoint, "update_profile") == 0 && strcmp(method, "POST") == 0) {
             // Parse payload
             char username[MAX_USERNAME_LENGTH] = {0};
             char name[MAX_NAME_LENGTH] = {0};
@@ -627,7 +625,10 @@
              }
              
              send_response(client_fd, 200, "application/json", response);
-         }else if (strncmp(endpoint, "meetings", 8) == 0 && strcmp(method, "GET") == 0) {
+         }// Missing API endpoints that need to be implemented in server.c
+ 
+ // 1. Meetings endpoint implementation
+ else if (strncmp(endpoint, "meetings", 8) == 0 && strcmp(method, "GET") == 0) {
      // Parse query parameter for mentee username
      char mentee_username[MAX_USERNAME_LENGTH] = {0};
      char* query_start = strchr(path, '?');
@@ -735,12 +736,15 @@
                         "{\"username\": \"%s\", \"name\": \"%s\", \"email\": \"%s\", "
                         "\"phone\": \"%s\", \"department\": \"%s\", \"year\": %d, "
                         "\"digitalId\": \"%s\", \"registrationNumber\": \"%s\", "
+                        "\"parentName\": \"%s\", \"parentEmail\": \"%s\", "
                         "\"parentContact\": \"%s\", \"mentorName\": \"%s\", "
                         "\"meetingCount\": %d, \"taskCount\": %d}", 
                         mentees[i]->username, mentees[i]->name, mentees[i]->email,
                         mentees[i]->phone, mentees[i]->department, mentees[i]->data.mentee_data.year,
                         mentees[i]->data.mentee_data.digital_id, 
                         mentees[i]->data.mentee_data.registration_number,
+                        mentees[i]->data.mentee_data.parent_name,
+                        mentees[i]->data.mentee_data.parent_email,
                         mentees[i]->data.mentee_data.parent_contact,
                         mentor_name,
                         meeting_count, task_count);
@@ -759,10 +763,7 @@
     }
     
     send_response(client_fd, 200, "application/json", response);
-}
- 
- // 2. Add Meeting endpoint
- else if (strcmp(endpoint, "add_meeting") == 0 && strcmp(method, "POST") == 0) {
+}else if (strcmp(endpoint, "add_meeting") == 0 && strcmp(method, "POST") == 0) {
      // Parse payload
      char mentee[MAX_USERNAME_LENGTH] = {0};
      char date[MAX_DATE_LENGTH] = {0};

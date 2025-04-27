@@ -6,7 +6,7 @@ User* current_user = NULL;
 User* mentor_list[MAX_MENTORS] = {NULL};
 int mentor_count = 0;
 
-//Hash table functions
+// Hash function
 unsigned int hash(char* username) {
     unsigned int hash_value = 0;
     for (int i = 0; username[i] != '\0'; i++) {
@@ -350,7 +350,6 @@ User* register_mentee(char* username, char* password, char* name, char* email, c
     free(mentee);
     return NULL;
 }
-
 bool update_mentee_info(User* mentee, char* name, char* email, char* phone, char* department, int year, char* digital_id, char* registration_number, char* parent_name, char* parent_email, char* parent_contact) {
     
     strncpy(mentee->name, name, MAX_NAME_LENGTH);
@@ -366,7 +365,9 @@ bool update_mentee_info(User* mentee, char* name, char* email, char* phone, char
     
     return true;
 }
+
 //File handling functions
+
 void save_users_to_file() {
     FILE* file = fopen("users.dat", "wb");
     if (!file) {
@@ -390,10 +391,10 @@ void save_users_to_file() {
                 fwrite(&user->data.mentee_data.year, sizeof(int), 1, file);
                 fwrite(user->data.mentee_data.digital_id, sizeof(char), MAX_DIGITAL_ID_LENGTH, file);
                 fwrite(user->data.mentee_data.registration_number, sizeof(char), MAX_REG_NUMBER_LENGTH, file);
+                fwrite(user->data.mentee_data.parent_contact, sizeof(char), MAX_PHONE_LENGTH, file);
                 fwrite(user->data.mentee_data.parent_name, sizeof(char), MAX_NAME_LENGTH, file);
                 fwrite(user->data.mentee_data.parent_email, sizeof(char), MAX_EMAIL_LENGTH, file);
-                fwrite(user->data.mentee_data.parent_contact, sizeof(char), MAX_PHONE_LENGTH, file);
-                
+
                 // Save mentor username
                 char mentor_username[MAX_USERNAME_LENGTH] = {0};
                 if (user->data.mentee_data.mentor) {
@@ -491,10 +492,10 @@ void load_users_from_file() {
             fread(&user->data.mentee_data.year, sizeof(int), 1, file);
             fread(user->data.mentee_data.digital_id, sizeof(char), MAX_DIGITAL_ID_LENGTH, file);
             fread(user->data.mentee_data.registration_number, sizeof(char), MAX_REG_NUMBER_LENGTH, file);
+            fread(user->data.mentee_data.parent_contact, sizeof(char), MAX_PHONE_LENGTH, file);
             fread(user->data.mentee_data.parent_name, sizeof(char), MAX_NAME_LENGTH, file);
             fread(user->data.mentee_data.parent_email, sizeof(char), MAX_EMAIL_LENGTH, file);
-            fread(user->data.mentee_data.parent_contact, sizeof(char), MAX_PHONE_LENGTH, file);
-            
+
             // Read mentor username
             char mentor_username[MAX_USERNAME_LENGTH];
             fread(mentor_username, sizeof(char), MAX_USERNAME_LENGTH, file);
@@ -625,24 +626,24 @@ User** get_sorted_mentees(User* mentor, int* count) {
 
 void generate_sample_data() {
     // Create sample mentors
-    User* mentor1 = register_mentor("mentor1", "password", "John Smith", "john@example.com", "1234567890", "Computer Science");
-    User* mentor2 = register_mentor("mentor2", "password", "Jane Doe", "jane@example.com", "9876543210", "Mathematics");
+    User* mentor1 = register_mentor("mentor1", "password", "John Smith", "john@example.com", "1234567890", "CSE");
+    User* mentor2 = register_mentor("mentor2", "password", "Jane Doe", "jane@example.com", "9876543210", "ECE");
     
-    User* mentee1 = register_mentee("mentee1", "password", "Alice Johnson", "alice@example.com", "1112223333", "Computer Science", 2, "1234567", "1234567890123", "Robert Johnson", "robert@example.com", "parent1@example.com", mentor1);
-    User* mentee2 = register_mentee("mentee2", "password", "Bob Brown", "bob@example.com", "4445556666", "Mathematics", 3, "2345678", "2345678901234", "Mary Brown", "mary@example.com", "parent2@example.com", mentor1);
-    User* mentee3 = register_mentee("mentee3", "password", "Carol Wilson", "carol@example.com", "7778889999", "Computer Science", 1, "3456789", "3456789012345", "Thomas Wilson", "thomas@example.com", "parent3@example.com", mentor2);
-   
-   add_task(mentee1, "Read 2 books", "15-05-2025");
-   add_task(mentee1, "Walk 10 mins everyday", "20-05-2025");
-   add_task(mentee2, "practice your presentation in front of your mmirror", "10-05-2025");
-   add_task(mentee3, "Practice presentation skills", "12-05-2025");
-   
-   add_meeting_note(mentee1, "01-04-2025", "Discussed academic progress and future plans. Alice is doing iscussed academic progress and future plans. Alice is doing iscussed academic progress and future plans. Alice is doing iscussed academic progress and future plans. Alice is doing iscussed academic progress and future plans. Alice is doing iscussed academic progress and future plans. Alice is doing iscussed academic progress and future plans. Alice is doing iscussed academic progress and future plans. Alice is doing iscussed academic progress and future plans. Alice is doing iscussed academic progress and future plans. Alice is doing iscussed academic progress and future plans. Alice is doing iscussed academic progress and future plans. Alice is doing well in programming courses but needs to improve time management skills. ");
-   add_meeting_note(mentee1, "15-04-2025", "Reviewed assignment progress. Suggested additional resources for the upcoming project.");
-   add_meeting_note(mentee2, "02-04-2025", "First meeting with Bob. Discussed expectations and goals for the semester.");
-   add_meeting_note(mentee3, "05-04-2025", "Introduced Carol to department resources and discussed study strategies.");
-   
-   save_users_to_file();
+    User* mentee1 = register_mentee("mentee1", "password", "Alice Johnson", "alice@example.com", "1112223333", "CSE", 2, "1234567", "1234567890123", "Alice's Parent", "parent1@example.com", "parent1@example.com", mentor1);
+    User* mentee2 = register_mentee("mentee2", "password", "Bob Brown", "bob@example.com", "4445556666", "IT", 3, "2345678", "2345678901234", "Bob's Parent", "parent2@example.com", "parent2@example.com", mentor1);
+    User* mentee3 = register_mentee("mentee3", "password", "Carol Wilson", "carol@example.com", "7778889999", "ECE", 1, "3456789", "3456789012345", "Carol's Parent", "parent3@example.com", "parent3@example.com", mentor2);
+    
+    add_task(mentee1, "Read 2 books", "15-05-2025");
+    add_task(mentee1, "Walk 10 mins everyday", "20-05-2025");
+    add_task(mentee2, "practice your presentation in front of your mirror", "10-05-2025");
+    add_task(mentee3, "Practice presentation skills", "12-05-2025");
+    
+    add_meeting_note(mentee1, "01-04-2025", "Discussed academic progress and future plans. Alice is doing well in programming courses but needs to improve time management skills.");
+    add_meeting_note(mentee1, "15-04-2025", "Reviewed assignment progress. Suggested additional resources for the upcoming project.");
+    add_meeting_note(mentee2, "02-04-2025", "First meeting with Bob. Discussed expectations and goals for the semester.");
+    add_meeting_note(mentee3, "05-04-2025", "Introduced Carol to department resources and discussed study strategies.");
+    
+    save_users_to_file();
 }
 
 void initialize_system() {
@@ -694,7 +695,7 @@ User* api_register_mentee(char* username, char* password, char* name, char* emai
     }
     return mentee;
  }
- 
+
  bool api_update_mentee_info(char* username, char* name, char* email, char* phone, char* department, int year, char* digital_id, char* registration_number, char* parent_name, char* parent_email, char* parent_contact) {
     User* mentee = find_user(username);
     if (!mentee || mentee->role != MENTEE) {

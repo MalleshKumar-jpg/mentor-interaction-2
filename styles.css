@@ -1,4 +1,4 @@
-/* styles.css */
+/* Warm color palette styles with gradients */
 * {
     margin: 0;
     padding: 0;
@@ -7,14 +7,11 @@
 
 body {
     font-family: Arial, sans-serif;
-    background-color: #f4f4f9;
-    background-image: url('https://www.runsensible.com/wp-content/uploads/2024/07/The-Role-and-Importance-of-a-Legal-Mentor.jpg');
-    background-size: cover;
-    background-position: center; 
-    background-repeat: no-repeat;
-    background-attachment: fixed;
     color: #333;
+    background-image: url("https://img.pikbest.com/wp/202408/abstract-geometric-shape-shapes-and-textures-background_9911626.jpg!w700wp");
+    background-size: cover;
     line-height: 1.6;
+    min-height: 100vh;
 }
 
 .container {
@@ -26,30 +23,40 @@ body {
 h1 {
     text-align: center;
     margin-bottom: 30px;
-    color: #2c3e50;
+    color: #006E7F; /* Teal */
+    text-shadow: 0px 1px 2px rgba(0,0,0,0.1);
 }
 
 h2 {
     margin-bottom: 20px;
-    color: #2c3e50;
+    color: #006E7F; /* Teal */
 }
 
 .login-container, .register-container, .dashboard-container {
-    background-color: #fff;
+    background: #fff;
     padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
     max-width: 600px;
     margin: 0 auto;
 }
 
 .dashboard-nav {
-    padding: 30px;
-    background-color: #fff;
+    padding: 20px 30px;
+    /* Gradient using the teal from the palette */
+    background: linear-gradient(to right, #006E7F, #00596a);
     display: flex;
     justify-content: space-between;
-    align-items: baseline;
+    align-items: center;
     margin-bottom: 20px;
+    color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 110, 127, 0.3);
+}
+
+.dashboard-nav h1 {
+    color: #fff;
+    margin-bottom: 0;
 }
 
 .form-group {
@@ -60,14 +67,23 @@ label {
     display: block;
     margin-bottom: 5px;
     font-weight: bold;
+    color: #006E7F; /* Teal */
 }
 
 input, select, textarea {
     width: 100%;
-    padding: 10px;
+    padding: 12px;
     border: 1px solid #ddd;
-    border-radius: 4px;
+    border-radius: 8px;
     font-size: 16px;
+    background-color: #fcfcfc;
+    transition: all 0.3s ease;
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: #F8CB2E; /* Yellow */
+    box-shadow: 0 0 8px rgba(248, 203, 46, 0.25);
+    outline: none;
 }
 
 .button-group {
@@ -76,18 +92,23 @@ input, select, textarea {
 }
 
 button {
-    background-color: #3498db;
+    /* Gradient using the orange from the palette */
+    background: linear-gradient(to right, #EE5007, #e04600);
     color: #fff;
     border: none;
-    padding: 10px 20px;
-    border-radius: 4px;
+    padding: 12px 24px;
+    border-radius: 8px;
     cursor: pointer;
     font-size: 16px;
-    transition: background-color 0.3s;
+    font-weight: 500;
+    transition: all 0.3s;
+    box-shadow: 0 4px 10px rgba(238, 80, 7, 0.25);
 }
 
 button:hover {
-    background-color: #2980b9;
+    background: linear-gradient(to right, #e04600, #d13e00);
+    box-shadow: 0 6px 12px rgba(238, 80, 7, 0.3);
+    transform: translateY(-2px);
 }
 
 .links {
@@ -98,58 +119,59 @@ button:hover {
 .links a {
     display: inline-block;
     margin: 10px;
-    color: #3498db;
+    color: #006E7F; /* Teal */
     text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s;
 }
 
 .links a:hover {
+    color: #EE5007; /* Orange */
     text-decoration: underline;
 }
 
-.dashboard-nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
+/* Make logout button stand out */
+#logout-button {
+    background: linear-gradient(to right, #B22727, #a12323);
+    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: 50px;
+    box-shadow: 0 4px 10px rgba(178, 39, 39, 0.3);
 }
 
-.dashboard-nav button {
-    background-color: #e74c3c;
-}
-
-.dashboard-nav button:hover {
-    background-color: #c0392b;
-}
-
-.dashboard-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.tab-container {
-    margin-top: 20px;
+#logout-button:hover {
+    background: linear-gradient(to right, #a12323, #901e1e);
+    box-shadow: 0 6px 12px rgba(178, 39, 39, 0.4);
 }
 
 .tab-buttons {
     display: flex;
     margin-bottom: 20px;
-    border-bottom: 1px solid #ddd;
     gap: 10px;
 }
 
 .tab-button {
-    padding: 10px 50px;
-    color : white;
+    padding: 12px 30px;
+    background: linear-gradient(to bottom, #006E7F, #005a68);
+    color: white;
     border: none;
     cursor: pointer;
-    border-bottom: 3px solid transparent;
+    border-radius: 8px;
+    transition: all 0.3s;
+    flex: 1;
+    text-align: center;
+}
+
+.tab-button:hover {
+    background: linear-gradient(to bottom, #00596a, #004a59);
+    transform: translateY(-2px);
 }
 
 .tab-button.active {
-    background-color: green;
-    color : white;
+    background: linear-gradient(to bottom, #F8CB2E, #e9bd20);
+    color: #333;
     font-weight: bold;
+    box-shadow: 0 4px 12px rgba(248, 203, 46, 0.3);
 }
 
 .tab-content {
@@ -161,15 +183,24 @@ button:hover {
 }
 
 .list-item {
-    background-color: #f9f9f9;
-    padding: 15px;
-    margin-bottom: 10px;
-    border-radius: 4px;
+    background: linear-gradient(to right, #fff, #f9f9f9);
+    padding: 20px;
+    margin-bottom: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    border-left: 5px solid transparent;
+}
+
+.list-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    border-left: 5px solid #F8CB2E; /* Yellow accent on hover */
 }
 
 .list-item h3 {
     margin-bottom: 10px;
-    color: #2c3e50;
+    color: #006E7F; /* Teal */
 }
 
 .list-item p {
@@ -181,17 +212,17 @@ button:hover {
 }
 
 .list-item button {
-    padding: 5px 10px;
+    padding: 8px 16px;
     margin-left: 10px;
     font-size: 14px;
 }
 
 .list-item button.delete {
-    background-color: #e74c3c;
+    background: linear-gradient(to right, #B22727, #a12323);
 }
 
 .list-item button.delete:hover {
-    background-color: #c0392b;
+    background: linear-gradient(to right, #a12323, #901e1e);
 }
 
 .modal {
@@ -203,14 +234,20 @@ button:hover {
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 100;
+    overflow-y: auto;
+    max-height: 100vh;
 }
 
 .modal-content {
-    background-color: #fff;
+    background: #fff;
     margin: 10% auto;
-    padding: 20px;
-    border-radius: 8px;
+    padding: 30px;
+    border-radius: 12px;
     max-width: 500px;
+    width: 90%;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    border-top: 5px solid #F8CB2E; /* Yellow accent at top */
 }
 
 .close-button {
@@ -218,24 +255,36 @@ button:hover {
     font-size: 24px;
     font-weight: bold;
     cursor: pointer;
+    color: #006E7F; /* Teal */
+    transition: color 0.2s;
+}
+
+.close-button:hover {
+    color: #EE5007; /* Orange */
 }
 
 .error-message {
-    color: #e74c3c;
+    color: #B22727; /* Red */
     margin-bottom: 15px;
     text-align: center;
+    padding: 12px;
+    background: rgba(178, 39, 39, 0.1);
+    border-radius: 8px;
 }
 
 .success-message {
-    color: #27ae60;
+    color: #28a745;
     margin-bottom: 15px;
     text-align: center;
+    padding: 12px;
+    background: rgba(40, 167, 69, 0.1);
+    border-radius: 8px;
 }
 
 #profile-modal .modal-content {
     max-height: 80vh;
     overflow-y: auto;
-    padding: 20px;
+    padding: 30px;
 }
 
 #profile-modal .modal-content form {
@@ -252,17 +301,18 @@ button:hover {
 #profile-modal .form-group label {
     margin-bottom: 5px;
     font-weight: bold;
+    color: #006E7F; /* Teal */
 }
 
 #profile-modal .form-group input,
 #profile-modal .form-group select {
-    padding: 8px;
+    padding: 12px;
     border: 1px solid #ddd;
-    border-radius: 4px;
+    border-radius: 8px;
 }
 
 #profile-modal .form-group small {
-    color: #666;
+    color: #777;
     font-size: 0.8em;
     margin-top: 5px;
 }
@@ -270,30 +320,14 @@ button:hover {
 #profile-modal .button-group {
     display: flex;
     justify-content: flex-end;
-    margin-top: 15px;
+    margin-top: 20px;
 }
 
 #profile-modal .button-group button {
-    padding: 10px 15px;
-    background-color: #4CAF50;
+    padding: 12px 24px;
+    background: linear-gradient(to right, #EE5007, #e04600);
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: 8px;
     cursor: pointer;
-}
-
-#profile-modal .button-group button:hover {
-    background-color: #45a049;
-}
-
-.modal {
-    overflow-y: auto;
-    max-height: 100vh;
-}
-
-.modal-content {
-    margin: 10% auto;
-    max-width: 500px;
-    width: 90%;
-    position: relative;
 }

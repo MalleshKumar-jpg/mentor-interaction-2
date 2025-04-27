@@ -1,8 +1,10 @@
 // Global variables
 let currentUser = null;
+let currentMenteeName = "";
 
 // DOM ready event
 document.addEventListener("DOMContentLoaded", function() {
+    
     // Check if user is logged in
     const userString = localStorage.getItem("currentUser");
     if (userString) {
@@ -52,7 +54,6 @@ function setupLoginPage() {
     if (loginForm) {
         loginForm.addEventListener("submit", function(e) {
             e.preventDefault();
-            
             const username = document.getElementById("username").value;
             const password = document.getElementById("password").value;
             
@@ -108,11 +109,13 @@ function setupMenteeRegistrationPage() {
             const year = document.getElementById("year").value;
             const digitalId = document.getElementById("digital-id").value;
             const registrationNumber = document.getElementById("registration-number").value;
+            const parentName = document.getElementById("parent-name").value;
+            const parentEmail = document.getElementById("parent-email").value;
             const parentContact = document.getElementById("parent-contact").value;
             const mentorUsername = document.getElementById("mentor").value;
             
             registerMentee(username, password, name, email, phone, department, 
-                          year, digitalId, registrationNumber, parentContact, mentorUsername);
+                          year, digitalId, registrationNumber, parentName, parentEmail, parentContact, mentorUsername);
         });
     }
 }
@@ -410,7 +413,7 @@ async function registerMentor(username, password, name, email, phone, department
         showError("Server error. Please try again later.");
     }
 }
-async function registerMentee(username, password, name, email, phone, department, year, digitalId, registrationNumber, parentContact, mentorUsername) {
+async function registerMentee(username, password, name, email, phone, department, year, digitalId, registrationNumber, parentName, parentEmail, parentContact, mentorUsername) {
     try {
         // Enhanced validation with more detailed error messages
         if (!validateName(name)) {
@@ -438,8 +441,18 @@ async function registerMentee(username, password, name, email, phone, department
             return;
         }
         
+        if (!validateName(parentName)) {
+            showError("Invalid parent name format. Name should start with a letter and contain only letters, spaces, and periods.");
+            return;
+        }
+        
+        if (!validateEmail(parentEmail)) {
+            showError("Invalid parent email format. Please provide a valid email address.");
+            return;
+        }
+        
         if (!validateParentContact(parentContact)) {
-            showError("Invalid Parent Contact. Please provide a valid email or 10-digit phone number.");
+            showError("Invalid Parent Contact. Please provide a valid 10-digit phone number.");
             return;
         }
         
@@ -458,6 +471,7 @@ async function registerMentee(username, password, name, email, phone, department
                   `phone=${encodeURIComponent(phone)}&department=${encodeURIComponent(department)}&` +
                   `year=${encodeURIComponent(year)}&digitalId=${encodeURIComponent(digitalId)}&` +
                   `registrationNumber=${encodeURIComponent(registrationNumber)}&` +
+                  `parentName=${encodeURIComponent(parentName)}&parentEmail=${encodeURIComponent(parentEmail)}&` +
                   `parentContact=${encodeURIComponent(parentContact)}&` +
                   `mentorUsername=${encodeURIComponent(mentorUsername)}`
         });
@@ -527,19 +541,23 @@ async function loadMentees() {
                             <p><strong>Digital ID:</strong> ${mentee.digitalId}</p>
                             <p><strong>Registration Number:</strong> ${mentee.registrationNumber}</p>
                         </div>
+                        <div class="parent-info">
+                            <h4>Parent Information</h4>
+                            <p><strong>Parent Name:</strong> ${mentee.parentName || "N/A"}</p>
+                            <p><strong>Parent Email:</strong> ${mentee.parentEmail || "N/A"}</p>
+                            <p><strong>Parent Contact:</strong> ${mentee.parentContact}</p>
+                        </div>
                         <div class="mentorship-info">
                             <h4>Mentorship Details</h4>
-                            <p><strong>Parent Contact:</strong> ${mentee.parentContact}</p>
-                            <p><strong>Mentor:</strong> ${mentee.mentorName}</p>
                             <p><strong>Meetings:</strong> ${mentee.meetingCount} | 
                                <strong>Tasks:</strong> ${mentee.taskCount}</p>
                         </div>
                     </div>
                     <div class="button-group">
-                        <button class="view-tasks" data-username="${mentee.username}">View Tasks</button>
-                        <button class="view-meetings" data-username="${mentee.username}">View Meetings</button>
-                        <button class="add-task" data-username="${mentee.username}">Add Task</button>
-                        <button class="add-meeting" data-username="${mentee.username}">Add Meeting Note</button>
+                        <button class="view-tasks" data-username="${mentee.username}" data-name="${mentee.name}">View Tasks</button>
+                        <button class="view-meetings" data-username="${mentee.username}" data-name="${mentee.name}">View Meetings</button>
+                        <button class="add-task" data-username="${mentee.username}" data-name="${mentee.name}">Add Task</button>
+                        <button class="add-meeting" data-username="${mentee.username}" data-name="${mentee.name}">Add Meeting Note</button>
                     </div>
                 `;
                 
@@ -548,20 +566,23 @@ async function loadMentees() {
                 // Add event listeners (keep existing event listeners from previous implementation)
                 menteeItem.querySelector(".view-tasks").addEventListener("click", function() {
                     const username = this.getAttribute("data-username");
-                    viewMenteeTasks(username);
+                    const name = this.getAttribute("data-name");
+                    viewMenteeTasks(username, name);
                 });
                 
                 menteeItem.querySelector(".view-meetings").addEventListener("click", function() {
                     const username = this.getAttribute("data-username");
-                    viewMenteeMeetings(username);
+                    const name = this.getAttribute("data-name");
+                    viewMenteeMeetings(username, name);
                 });
                 
                 menteeItem.querySelector(".add-task").addEventListener("click", function() {
                     const username = this.getAttribute("data-username");
+                    const name = this.getAttribute("data-name");
                     document.getElementById("task-modal").style.display = "block";
                     document.getElementById("task-form").reset();
                     document.getElementById("task-mentee").value = username;
-                    document.getElementById("task-form-title").textContent = `Add Task for ${mentee.name}`;
+                    document.getElementById("task-form-title").textContent = `Add Task for ${name}`;
                     
                     // Set the form submission handler
                     const taskForm = document.getElementById("task-form");
@@ -571,10 +592,11 @@ async function loadMentees() {
                 
                 menteeItem.querySelector(".add-meeting").addEventListener("click", function() {
                     const username = this.getAttribute("data-username");
+                    const name = this.getAttribute("data-name");
                     document.getElementById("meeting-modal").style.display = "block";
                     document.getElementById("meeting-form").reset();
                     document.getElementById("meeting-mentee").value = username;
-                    document.getElementById("meeting-form-title").textContent = `Add Meeting Note for ${mentee.name}`;
+                    document.getElementById("meeting-form-title").textContent = `Add Meeting Note for ${name}`;
                     
                     // Set the form submission handler
                     const meetingForm = document.getElementById("meeting-form");
@@ -590,7 +612,7 @@ async function loadMentees() {
     }
 }
 
-async function viewMenteeTasks(menteeUsername) {
+async function viewMenteeTasks(menteeUsername, menteeName) {
     try {
         const response = await fetch(`/api/tasks?mentee=${encodeURIComponent(menteeUsername)}`);
         const data = await response.json();
@@ -598,6 +620,9 @@ async function viewMenteeTasks(menteeUsername) {
         if (data.success) {
             const tasksList = document.getElementById("tasks-list");
             tasksList.innerHTML = "";
+
+            // Update the heading
+            document.getElementById("tasks-heading").textContent = `${menteeName}'s Tasks`;
             
             if (data.tasks.length === 0) {
                 tasksList.innerHTML = "<p>No tasks assigned yet.</p>";
@@ -611,8 +636,8 @@ async function viewMenteeTasks(menteeUsername) {
                     <h3>${task.description}</h3>
                     <p><strong>Due Date:</strong> ${task.dueDate}</p>
                     <div class="button-group">
-                        <button class="edit-task" data-index="${index}" data-mentee="${menteeUsername}">Edit</button>
-                        <button class="delete-task delete" data-index="${index}" data-mentee="${menteeUsername}">Delete</button>
+                        <button class="edit-task" data-index="${index}" data-mentee="${menteeUsername}" data-name="${menteeName}">Edit</button>
+                        <button class="delete-task delete" data-index="${index}" data-mentee="${menteeUsername}" data-name="${menteeName}">Delete</button>
                     </div>
                 `;
                 
@@ -622,12 +647,14 @@ async function viewMenteeTasks(menteeUsername) {
                 taskItem.querySelector(".delete-task").addEventListener("click", function() {
                     const index = this.getAttribute("data-index");
                     const mentee = this.getAttribute("data-mentee");
-                    deleteTask(mentee, index);
+                    const name = this.getAttribute("data-name");
+                    deleteTask(mentee, index, name);
                 });
                 
                 taskItem.querySelector(".edit-task").addEventListener("click", function() {
                     const index = this.getAttribute("data-index");
                     const mentee = this.getAttribute("data-mentee");
+                    const name = this.getAttribute("data-name");
                     
                     document.getElementById("task-modal").style.display = "block";
                     document.getElementById("task-form").reset();
@@ -642,7 +669,7 @@ async function viewMenteeTasks(menteeUsername) {
                     const today = new Date().toISOString().split('T')[0];
                     document.getElementById("task-due-date").min = today;
                     
-                    document.getElementById("task-form-title").textContent = "Edit Task";
+                    document.getElementById("task-form-title").textContent = `Edit Task for ${name}`;
                     
                     // Set the form submission handler
                     const taskForm = document.getElementById("task-form");
@@ -663,7 +690,7 @@ async function viewMenteeTasks(menteeUsername) {
                         // Format the date from yyyy-mm-dd to dd-mm-yyyy for backend
                         const dueDate = formatDateForBackend(dueDateInput.value);
                         
-                        editTask(menteeUsername, index, description, dueDate);
+                        editTask(menteeUsername, index, description, dueDate, name);
                     });
                 });
             });
@@ -682,7 +709,7 @@ async function viewMenteeTasks(menteeUsername) {
     }
 }
 
-async function viewMenteeMeetings(menteeUsername) {
+async function viewMenteeMeetings(menteeUsername, menteeName) {
     try {
         const response = await fetch(`/api/meetings?mentee=${encodeURIComponent(menteeUsername)}`);
         const data = await response.json();
@@ -690,6 +717,9 @@ async function viewMenteeMeetings(menteeUsername) {
         if (data.success) {
             const meetingsList = document.getElementById("meetings-list");
             meetingsList.innerHTML = "";
+
+            // Update the heading
+            document.getElementById("meetings-heading").textContent = `${menteeName}'s Meeting Notes`;
             
             if (data.meetings.length === 0) {
                 meetingsList.innerHTML = "<p>No meeting notes yet.</p>";
@@ -703,8 +733,8 @@ async function viewMenteeMeetings(menteeUsername) {
                     <h3>Meeting on ${meeting.date}</h3>
                     <p>${meeting.summary}</p>
                     <div class="button-group">
-                        <button class="edit-meeting" data-index="${index}" data-mentee="${menteeUsername}">Edit</button>
-                        <button class="delete-meeting delete" data-index="${index}" data-mentee="${menteeUsername}">Delete</button>
+                        <button class="edit-meeting" data-index="${index}" data-mentee="${menteeUsername}" data-name="${menteeName}">Edit</button>
+                        <button class="delete-meeting delete" data-index="${index}" data-mentee="${menteeUsername}" data-name="${menteeName}">Delete</button>
                     </div>
                 `;
                 
@@ -714,12 +744,14 @@ async function viewMenteeMeetings(menteeUsername) {
                 meetingItem.querySelector(".delete-meeting").addEventListener("click", function() {
                     const index = this.getAttribute("data-index");
                     const mentee = this.getAttribute("data-mentee");
-                    deleteMeetingNote(mentee, index);
+                    const name = this.getAttribute("data-name");
+                    deleteMeetingNote(mentee, index, name);
                 });
                 
                 meetingItem.querySelector(".edit-meeting").addEventListener("click", function() {
                     const index = this.getAttribute("data-index");
                     const mentee = this.getAttribute("data-mentee");
+                    const name = this.getAttribute("data-name");
                     
                     document.getElementById("meeting-modal").style.display = "block";
                     document.getElementById("meeting-form").reset();
@@ -734,7 +766,7 @@ async function viewMenteeMeetings(menteeUsername) {
                     document.getElementById("meeting-date").max = today;
                     
                     document.getElementById("meeting-summary").value = meeting.summary;
-                    document.getElementById("meeting-form-title").textContent = "Edit Meeting Note";
+                    document.getElementById("meeting-form-title").textContent = `Edit Meeting Note for ${name}`;
                     
                     // Set the form submission handler
                     const meetingForm = document.getElementById("meeting-form");
@@ -755,7 +787,7 @@ async function viewMenteeMeetings(menteeUsername) {
                         // Format the date from yyyy-mm-dd to dd-mm-yyyy for backend
                         const date = formatDateForBackend(dateInput.value);
                         
-                        editMeetingNote(menteeUsername, index, date, summary);
+                        editMeetingNote(menteeUsername, index, date, summary, name);
                     });
                 });
             });
@@ -835,7 +867,7 @@ async function loadTasks() {
                 taskItem.innerHTML = `
                     <h3>${task.description}</h3>
                     <p><strong>Due Date:</strong> ${task.dueDate}</p>
-                `;
+`;
                 
                 tasksList.appendChild(taskItem);
             });
@@ -899,9 +931,9 @@ async function loadProfile() {
                     <p><strong>Year:</strong> ${profile.year}</p>
                     <p><strong>Digital ID:</strong> ${profile.digitalId}</p>
                     <p><strong>Registration Number:</strong> ${profile.registrationNumber}</p>
-                    <p><strong>Parent's Name:</strong> ${profile.parentName}</p>
-                    <p><strong>Parent's Email:</strong> ${profile.parentEmail}</p>
-                    <p><strong>Parent's Phone:</strong> ${profile.parentContact}</p>
+                    <p><strong>Parent Name:</strong> ${profile.parentName || "N/A"}</p>
+                    <p><strong>Parent Email:</strong> ${profile.parentEmail || "N/A"}</p>
+                    <p><strong>Parent Contact:</strong> ${profile.parentContact}</p>
                     <p><strong>Mentor:</strong> ${profile.mentorName}</p>
                 </div>
             `;
@@ -918,8 +950,8 @@ async function loadProfile() {
                 document.getElementById("edit-year").value = profile.year;
                 document.getElementById("edit-digital-id").value = profile.digitalId;
                 document.getElementById("edit-registration-number").value = profile.registrationNumber;
-                document.getElementById("edit-parent-name").value = profile.parentName;
-                document.getElementById("edit-parent-email").value = profile.parentEmail;
+                document.getElementById("edit-parent-name").value = profile.parentName || "";
+                document.getElementById("edit-parent-email").value = profile.parentEmail || "";
                 document.getElementById("edit-parent-contact").value = profile.parentContact;
                 
                 // Set up form submission
@@ -938,7 +970,8 @@ async function loadProfile() {
                     const parentEmail = document.getElementById("edit-parent-email").value;
                     const parentContact = document.getElementById("edit-parent-contact").value;
                     
-                    updateProfile(name, email, phone, department, year, digitalId, registrationNumber, parentName, parentEmail, parentContact);
+                    updateProfile(name, email, phone, department, year, digitalId, registrationNumber, 
+                                 parentName, parentEmail, parentContact);
                 });
             });
         } else {
@@ -977,18 +1010,18 @@ async function updateProfile(name, email, phone, department, year, digitalId, re
             return;
         }
         
-        if (!validateName(parentName)) {
-            showError("Invalid parent name format. Parent name should start with a letter and contain only letters, spaces, and periods.");
+        if (parentName && !validateName(parentName)) {
+            showError("Invalid parent name format. Name should start with a letter and contain only letters, spaces, and periods.");
             return;
         }
         
-        if (!validateEmail(parentEmail)) {
+        if (parentEmail && !validateEmail(parentEmail)) {
             showError("Invalid parent email format. Please provide a valid email address.");
             return;
         }
         
         if (!validateParentContact(parentContact)) {
-            showError("Invalid Parent Contact. Please provide a valid email or 10-digit phone number.");
+            showError("Invalid Parent Contact. Please provide a valid 10-digit phone number.");
             return;
         }
         
@@ -1047,7 +1080,7 @@ async function addTask(menteeUsername, description, dueDate) {
             
             // Reload tasks if we're on the tasks tab
             if (document.getElementById("tasks-tab").classList.contains("active")) {
-                viewMenteeTasks(menteeUsername);
+                viewMenteeTasks(menteeUsername, currentMenteeName);
             }
         } else {
             showError(data.message || "Failed to add task");
@@ -1057,7 +1090,7 @@ async function addTask(menteeUsername, description, dueDate) {
     }
 }
 
-async function editTask(menteeUsername, taskIndex, description, dueDate) {
+async function editTask(menteeUsername, taskIndex, description, dueDate, menteeName) {
     try {
         // Validate that the backend date format is correct
         if (!validateBackendDateFormat(dueDate)) {
@@ -1081,7 +1114,7 @@ async function editTask(menteeUsername, taskIndex, description, dueDate) {
         if (data.success) {
             document.getElementById("task-modal").style.display = "none";
             showSuccess("Task updated successfully!");
-            viewMenteeTasks(menteeUsername);
+            viewMenteeTasks(menteeUsername, menteeName);
         } else {
             showError(data.message || "Failed to update task");
         }
@@ -1090,7 +1123,7 @@ async function editTask(menteeUsername, taskIndex, description, dueDate) {
     }
 }
 
-async function deleteTask(menteeUsername, taskIndex) {
+async function deleteTask(menteeUsername, taskIndex, menteeName) {
     if (!confirm("Are you sure you want to delete this task?")) {
         return;
     }
@@ -1109,7 +1142,7 @@ async function deleteTask(menteeUsername, taskIndex) {
         
         if (data.success) {
             showSuccess("Task deleted successfully!");
-            viewMenteeTasks(menteeUsername);
+            viewMenteeTasks(menteeUsername, menteeName);
         } else {
             showError(data.message || "Failed to delete task");
         }
@@ -1145,7 +1178,7 @@ async function addMeetingNote(menteeUsername, date, summary) {
             
             // Reload meetings if we're on the meetings tab
             if (document.getElementById("meetings-tab").classList.contains("active")) {
-                viewMenteeMeetings(menteeUsername);
+                viewMenteeMeetings(menteeUsername, currentMenteeName);
             } else {
                 // If we're on the mentees tab, reload it to update the meeting count
                 loadMentees();
@@ -1158,7 +1191,7 @@ async function addMeetingNote(menteeUsername, date, summary) {
     }
 }
 
-async function editMeetingNote(menteeUsername, noteIndex, date, summary) {
+async function editMeetingNote(menteeUsername, noteIndex, date, summary, menteeName) {
     try {
         // Validate that the backend date format is correct
         if (!validateBackendDateFormat(date)) {
@@ -1182,7 +1215,7 @@ async function editMeetingNote(menteeUsername, noteIndex, date, summary) {
         if (data.success) {
             document.getElementById("meeting-modal").style.display = "none";
             showSuccess("Meeting note updated successfully!");
-            viewMenteeMeetings(menteeUsername);
+            viewMenteeMeetings(menteeUsername, menteeName);
         } else {
             showError(data.message || "Failed to update meeting note");
         }
@@ -1191,7 +1224,7 @@ async function editMeetingNote(menteeUsername, noteIndex, date, summary) {
     }
 }
 
-async function deleteMeetingNote(menteeUsername, noteIndex) {
+async function deleteMeetingNote(menteeUsername, noteIndex, menteeName) {
     if (!confirm("Are you sure you want to delete this meeting note?")) {
         return;
     }
@@ -1210,7 +1243,7 @@ async function deleteMeetingNote(menteeUsername, noteIndex) {
         
         if (data.success) {
             showSuccess("Meeting note deleted successfully!");
-            viewMenteeMeetings(menteeUsername);
+            viewMenteeMeetings(menteeUsername, menteeName);
         } else {
             showError(data.message || "Failed to delete meeting note");
         }
@@ -1242,10 +1275,9 @@ function validateRegistrationNumber(registrationNumber) {
 }
 
 function validateParentContact(parentContact) {
-    // This can be either an email or a phone number
-    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z]+\.[a-zA-Z]{2,}$/;
+    // This should be a 10-digit phone number
     const phoneRegex = /^[0-9]{10}$/;
-    return emailRegex.test(parentContact) || phoneRegex.test(parentContact);
+    return phoneRegex.test(parentContact);
 }
 
 function validateName(name) {
