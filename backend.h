@@ -84,9 +84,9 @@ User* find_user(char* username);
 
 User* api_login(char* username, char* password);
 void api_logout();
-User* api_register_mentor(char* username, char* password, char* name, char* email, char* phone, char* department);
-User* api_register_mentee(char* username, char* password, char* name, char* email, char* phone, char* department, int year, char* digital_id, char* registration_number, char* parent_name, char* parent_email, char* parent_contact, char* mentor_username);
+User* api_register_mentor(char* username, char* password, char* name, char* email, char* phone, char* department);User* api_register_mentee(char* username, char* password, char* name, char* email, char* phone, char* department, int year, char* digital_id, char* registration_number, char* parent_name, char* parent_email, char* parent_contact, char* mentor_username);
 bool api_update_mentee_info(char* username, char* name, char* email, char* phone, char* department, int year, char* digital_id, char* registration_number, char* parent_name, char* parent_email, char* parent_contact);
+
 bool api_add_task(char* mentee_username, char* description, char* due_date);
 bool api_delete_task(char* mentee_username, int task_index);
 bool api_add_meeting_note(char* mentee_username, char* date, char* summary);

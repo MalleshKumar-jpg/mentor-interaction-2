@@ -1,12 +1,12 @@
 #include "backend.h"
 
-// Global variables
+//global 
 User* hash_table[HASH_TABLE_SIZE] = {NULL};
 User* current_user = NULL;
 User* mentor_list[MAX_MENTORS] = {NULL};
 int mentor_count = 0;
 
-// Hash function
+//hash function
 unsigned int hash(char* username) {
     unsigned int hash_value = 0;
     for (int i = 0; username[i] != '\0'; i++) {
@@ -115,7 +115,6 @@ MenteeBSTNode* remove_bst_node(MenteeBSTNode* root, User* mentee) {
     return root;
 }
 
-// User functions
 
 //returns the user structure with given username
 User* find_user(char* username) {
@@ -223,11 +222,6 @@ bool delete_task(User* mentee, int task_index) { //task_index is input based on 
    return true;
 }
 
-
-
-// Meeting notes functions
-
-
 Meeting_note* create_meeting_note(char* date, char* summary) {
     Meeting_note* note = (Meeting_note*)malloc(sizeof(Meeting_note));
 
@@ -271,7 +265,7 @@ bool delete_meeting_note(User* mentee, int note_index) {
     }
     
     if (current == NULL) {
-        return false;  // Note not found
+        return false;  
     }
     
     if (prev == NULL) {
@@ -290,7 +284,6 @@ bool delete_meeting_note(User* mentee, int note_index) {
    return true;
 }
 
-// Registration functions
 User* register_mentor(char* username, char* password, char* name, char* email, char* phone, char* department) {
     
     User* mentor = (User*)malloc(sizeof(User));
@@ -366,8 +359,6 @@ bool update_mentee_info(User* mentee, char* name, char* email, char* phone, char
     return true;
 }
 
-//File handling functions
-
 void save_users_to_file() {
     FILE* file = fopen("users.dat", "wb");
     if (!file) {
@@ -395,14 +386,12 @@ void save_users_to_file() {
                 fwrite(user->data.mentee_data.parent_name, sizeof(char), MAX_NAME_LENGTH, file);
                 fwrite(user->data.mentee_data.parent_email, sizeof(char), MAX_EMAIL_LENGTH, file);
 
-                // Save mentor username
                 char mentor_username[MAX_USERNAME_LENGTH] = {0};
                 if (user->data.mentee_data.mentor) {
                     strncpy(mentor_username, user->data.mentee_data.mentor->username, MAX_USERNAME_LENGTH);
                 }
                 fwrite(mentor_username, sizeof(char), MAX_USERNAME_LENGTH, file);
                 
-                // Save tasks
                 int task_count = 0;
                 Task* task = user->data.mentee_data.tasks;
                 while (task) {
@@ -418,7 +407,6 @@ void save_users_to_file() {
                     task = task->next;
                 }
                 
-                // Save meeting notes
                 int note_count = 0;
                 Meeting_note* note = user->data.mentee_data.meeting_notes;
                 while (note) {
@@ -448,7 +436,7 @@ void load_users_from_file() {
         return;
     }
     
-    // Clear existing data
+    //clear existed hash tables and m
     for (int i = 0; i < HASH_TABLE_SIZE; i++) {
         User* user = hash_table[i];
         while (user) {
@@ -624,7 +612,6 @@ User** get_sorted_mentees(User* mentor, int* count) {
 }
 
 void generate_sample_data() {
-    // Create sample mentors
     User* mentor1 = register_mentor("rajan.kumar", "Mentor@2025", "Dr. Rajan Kumar", "rajan.kumar@ssn.edu.in", "9845671230", "CSE");
     User* mentor2 = register_mentor("priya.sharma", "Faculty@2025", "Dr. Priya Sharma", "priya.sharma@ssn.edu.in", "7812345690", "ECE");
     
@@ -660,6 +647,7 @@ void initialize_system() {
        generate_sample_data();
    }
 }
+
 
 // API functions for server.c to use
 User* api_login(char* username, char* password) {

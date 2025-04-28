@@ -1,4 +1,3 @@
-/* Warm color palette styles with gradients */
 * {
     margin: 0;
     padding: 0;
@@ -8,7 +7,7 @@
 body {
     font-family: Arial, sans-serif;
     color: #333;
-    background-image: url("https://img.pikbest.com/wp/202408/abstract-geometric-shape-shapes-and-textures-background_9911626.jpg!w700wp");
+    background-image: url("https://images7.alphacoders.com/114/1142103.png");
     background-size: cover;
     line-height: 1.6;
     min-height: 100vh;
@@ -23,13 +22,13 @@ body {
 h1 {
     text-align: center;
     margin-bottom: 30px;
-    color: #006E7F; /* Teal */
+    color: #006E7F;
     text-shadow: 0px 1px 2px rgba(0,0,0,0.1);
 }
 
 h2 {
     margin-bottom: 20px;
-    color: #006E7F; /* Teal */
+    color: #006E7F;
 }
 
 .login-container, .register-container, .dashboard-container {
@@ -43,7 +42,6 @@ h2 {
 
 .dashboard-nav {
     padding: 20px 30px;
-    /* Gradient using the teal from the palette */
     background: linear-gradient(to right, #006E7F, #00596a);
     display: flex;
     justify-content: space-between;
@@ -67,7 +65,7 @@ label {
     display: block;
     margin-bottom: 5px;
     font-weight: bold;
-    color: #006E7F; /* Teal */
+    color: #006E7F; 
 }
 
 input, select, textarea {
@@ -92,7 +90,6 @@ input:focus, select:focus, textarea:focus {
 }
 
 button {
-    /* Gradient using the orange from the palette */
     background: linear-gradient(to right, #EE5007, #e04600);
     color: #fff;
     border: none;
@@ -119,18 +116,17 @@ button:hover {
 .links a {
     display: inline-block;
     margin: 10px;
-    color: #006E7F; /* Teal */
+    color: #006E7F;
     text-decoration: none;
     font-weight: 500;
     transition: all 0.2s;
 }
 
 .links a:hover {
-    color: #EE5007; /* Orange */
+    color: #EE5007;
     text-decoration: underline;
 }
 
-/* Make logout button stand out */
 #logout-button {
     background: linear-gradient(to right, #B22727, #a12323);
     font-weight: bold;
@@ -189,18 +185,16 @@ button:hover {
     border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
     transition: all 0.3s ease;
-    border-left: 5px solid transparent;
 }
 
 .list-item:hover {
     transform: translateY(-3px);
     box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-    border-left: 5px solid #F8CB2E; /* Yellow accent on hover */
 }
 
 .list-item h3 {
     margin-bottom: 10px;
-    color: #006E7F; /* Teal */
+    color: #006E7F; 
 }
 
 .list-item p {
@@ -247,7 +241,6 @@ button:hover {
     width: 90%;
     position: relative;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-    border-top: 5px solid #F8CB2E; /* Yellow accent at top */
 }
 
 .close-button {
@@ -255,16 +248,16 @@ button:hover {
     font-size: 24px;
     font-weight: bold;
     cursor: pointer;
-    color: #006E7F; /* Teal */
+    color: #006E7F;
     transition: color 0.2s;
 }
 
 .close-button:hover {
-    color: #EE5007; /* Orange */
+    color: #EE5007;
 }
 
 .error-message {
-    color: #B22727; /* Red */
+    color: #B22727;
     margin-bottom: 15px;
     text-align: center;
     padding: 12px;
@@ -330,4 +323,95 @@ button:hover {
     border: none;
     border-radius: 8px;
     cursor: pointer;
+}
+
+.mentee-actions {
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.action-buttons, .add-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.view-tasks, .view-meetings {
+    background: linear-gradient(to right, #006E7F, #005a68);
+    color: white;
+}
+
+.view-tasks:hover, .view-meetings:hover {
+    background: linear-gradient(to right, #005a68, #004a59);
+    transform: translateY(-2px);
+}
+
+.add-task, .add-meeting {
+    background: linear-gradient(to right, #F8CB2E, #e9bd20);
+    color: #333;
+}
+
+.add-task:hover, .add-meeting:hover {
+    background: linear-gradient(to right, #e9bd20, #d9ae11);
+    transform: translateY(-2px);
+}
+
+.mentor-info-card {
+    background: linear-gradient(to right, #f0f9ff, #e6f7ff);
+    padding: 20px;
+    margin-bottom: 25px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 110, 127, 0.15);
+}
+
+.mentor-info-card h3 {
+    color: #006E7F;
+    margin-bottom: 15px;
+    font-size: 1.3em;
+    padding-bottom: 8px;
+}
+
+.mentor-contact {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 30px;
+    margin-top: 10px;
+}
+
+.mentor-contact p {
+    margin: 0;
+}
+
+.student-profile-info {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.student-profile-info h3 {
+    color: #006E7F;
+    margin-bottom: 15px;
+    font-size: 1.3em;
+    padding-bottom: 8px;
+}
+
+.profile-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px 30px;
+}
+
+.parent-details {
+    grid-column: 1 / -1;
+    margin-top: 15px;
+    padding-top: 15px;
+}
+
+.parent-details h4 {
+    color: #006E7F;
+    margin-bottom: 10px;
+    font-size: 1.1em;
 }
