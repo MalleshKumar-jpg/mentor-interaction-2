@@ -354,11 +354,6 @@ async function registerMentor(username, password, name, email, phone, department
             return;
         }
         
-        if (!validateEmail(email)) {
-            showError("Invalid email format. Please provide a valid email address.");
-            return;
-        }
-        
         if (!validatePhone(phone)) {
             showError("Invalid phone number format. Please enter 10 digits.");
             return;
@@ -401,11 +396,6 @@ async function registerMentee(username, password, name, email, phone, department
             return;
         }
         
-        if (!validateEmail(email)) {
-            showError("Invalid email format. Please provide a valid email address.");
-            return;
-        }
-        
         if (!validatePhone(phone)) {
             showError("Invalid phone number format. Please enter 10 digits.");
             return;
@@ -423,11 +413,6 @@ async function registerMentee(username, password, name, email, phone, department
         
         if (!validateName(parentName)) {
             showError("Invalid parent name format. Name should start with a letter and contain only letters, spaces, and periods.");
-            return;
-        }
-        
-        if (!validateEmail(parentEmail)) {
-            showError("Invalid parent email format. Please provide a valid email address.");
             return;
         }
         
@@ -1031,11 +1016,6 @@ async function updateProfile(name, email, phone, department, year, digitalId, re
             return;
         }
         
-        if (!validateEmail(email)) {
-            showError("Invalid email format. Please provide a valid email address.");
-            return;
-        }
-        
         if (!validatePhone(phone)) {
             showError("Invalid phone number format. Please enter 10 digits.");
             return;
@@ -1056,7 +1036,7 @@ async function updateProfile(name, email, phone, department, year, digitalId, re
             return;
         }
         
-        if (parentEmail && !validateEmail(parentEmail)) {
+        if (parentEmail ) {
             showError("Invalid parent email format. Please provide a valid email address.");
             return;
         }
@@ -1285,11 +1265,6 @@ async function deleteMeetingNote(menteeUsername, noteIndex, menteeName) {
 }
 
 
-function validateEmail(email) {
-    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z]+\.[a-zA-Z]{2,}$/;
-    return emailRegex.test(email);
-}
-
 function validatePhone(phone) {
     const phoneRegex = /^[0-9]{10}$/;
     return phoneRegex.test(phone);
@@ -1317,8 +1292,7 @@ function validateName(name) {
 }
 
 function validatePassword(password) {
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
-    return passwordRegex.test(password);
+    return password.length >= 8;
 }
 
 function validateTaskDate(dateString) {
