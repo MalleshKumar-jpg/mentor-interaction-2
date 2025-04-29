@@ -364,6 +364,14 @@ async function registerMentor(username, password, name, email, phone, department
             return;
         }
         
+        const checkUsernameResponse = await fetch(`/api/profile?username=${encodeURIComponent(username)}`);
+        const checkUsernameData = await checkUsernameResponse.json();
+        
+        if (checkUsernameData.success) {
+            showError("Username already exists. Please choose a different username.");
+            return;
+        }
+        
         const response = await fetch("/api/register_mentor", {
             method: "POST",
             headers: {
@@ -423,6 +431,14 @@ async function registerMentee(username, password, name, email, phone, department
         
         if (!validatePassword(password)) {
             showError("Password must be at least 8 characters and contain at least one uppercase letter, one lowercase letter, and one number.");
+            return;
+        }
+        
+        const checkUsernameResponse = await fetch(`/api/profile?username=${encodeURIComponent(username)}`);
+        const checkUsernameData = await checkUsernameResponse.json();
+        
+        if (checkUsernameData.success) {
+            showError("Username already exists. Please choose a different username.");
             return;
         }
         
@@ -1036,10 +1052,6 @@ async function updateProfile(name, email, phone, department, year, digitalId, re
             return;
         }
         
-        if (parentEmail ) {
-            showError("Invalid parent email format. Please provide a valid email address.");
-            return;
-        }
         
         if (!validateParentContact(parentContact)) {
             showError("Invalid Parent Contact. Please provide a valid 10-digit phone number.");

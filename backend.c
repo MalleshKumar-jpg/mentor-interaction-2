@@ -15,45 +15,31 @@ unsigned int hash(char* username) {
     return hash_value % HASH_TABLE_SIZE;
 }
 
-// BST functions
-MenteeBSTNode* create_bst_node(User* mentee) {
+// Modified create_bst_node to accept pre-calculated meeting count
+MenteeBSTNode* create_bst_node(User* mentee, int meeting_count) {
     MenteeBSTNode* node = (MenteeBSTNode*)malloc(sizeof(MenteeBSTNode));
 
-    if (node) { //this code block will run if node was created succesfully
+    if (node) {
         node->mentee = mentee;
-        node->meeting_count = 0;
+        node->meeting_count = meeting_count;
         node->left = NULL;
         node->right = NULL;
-        
-      //iterating through linked list of mentees notes to get count of meeting notes
-        Meeting_note* note = mentee->data.mentee_data.meeting_notes;
-        while (note) {
-            node->meeting_count++;
-            note = note->next;
-        }
     }
     return node;
 }
 
-MenteeBSTNode* insert_bst_node(MenteeBSTNode* root, User* mentee) {
+// Modified insert_bst_node to accept pre-calculated meeting count
+MenteeBSTNode* insert_bst_node(MenteeBSTNode* root, User* mentee, int meeting_count) {
     if (root == NULL) {
-       MenteeBSTNode* node = create_bst_node(mentee);
+       MenteeBSTNode* node = create_bst_node(mentee, meeting_count);
        return node;
     }
     
-    // count number of meetings of mentee to order accordingly (we use number of meeting notes as the key)
-    int count = 0;
-    Meeting_note* note = mentee->data.mentee_data.meeting_notes;
-    while (note) {
-        count++;
-        note = note->next;
-    }
-    
     // Sort by meeting count in descending order
-    if (count > root->meeting_count) {
-        root->left = insert_bst_node(root->left, mentee);
+    if (meeting_count > root->meeting_count) {
+        root->left = insert_bst_node(root->left, mentee, meeting_count);
     } else {
-        root->right = insert_bst_node(root->right, mentee);
+        root->right = insert_bst_node(root->right, mentee, meeting_count);
     }
     
     return root;
@@ -235,22 +221,30 @@ Meeting_note* create_meeting_note(char* date, char* summary) {
 
 bool add_meeting_note(User* mentee, char* date, char* summary) {
    
-   Meeting_note* note = create_meeting_note(date, summary);
-   if (!note) {
-       return false;
-   }
-   
-   note->next = mentee->data.mentee_data.meeting_notes;
-   mentee->data.mentee_data.meeting_notes = note;
-   
-  //update mentor's BST since the key (meeting count) has changed , the structure of BST is compromised
-   //we update by deleting that mentee from BST and adding again
-   User* mentor = mentee->data.mentee_data.mentor;
-  mentor->data.mentor_data.mentees_bst_root = remove_bst_node(mentor->data.mentor_data.mentees_bst_root, mentee);
-  mentor->data.mentor_data.mentees_bst_root = insert_bst_node(mentor->data.mentor_data.mentees_bst_root, mentee);
-   
-   return true;
-}
+    Meeting_note* note = create_meeting_note(date, summary);
+    if (!note) {
+        return false;
+    }
+    
+    note->next = mentee->data.mentee_data.meeting_notes;
+    mentee->data.mentee_data.meeting_notes = note;
+    
+    //update mentor's BST since the key (meeting count) has changed , the structure of BST is compromised
+    //we update by deleting that mentee from BST and adding again
+    User* mentor = mentee->data.mentee_data.mentor;
+    mentor->data.mentor_data.mentees_bst_root = remove_bst_node(mentor->data.mentor_data.mentees_bst_root, mentee);
+    
+    // Calculate meeting count once
+    int count = 0;
+    Meeting_note* temp_note = mentee->data.mentee_data.meeting_notes;
+    while (temp_note) {
+        count++;
+        temp_note = temp_note->next;
+    }
+    
+    mentor->data.mentor_data.mentees_bst_root = insert_bst_node(mentor->data.mentor_data.mentees_bst_root, mentee, count);
+    return true;
+ }
 
 bool delete_meeting_note(User* mentee, int note_index) {
     
@@ -278,9 +272,15 @@ bool delete_meeting_note(User* mentee, int note_index) {
     
   //same reason as above function
    User* mentor = mentee->data.mentee_data.mentor;
-   mentor->data.mentor_data.mentees_bst_root = remove_bst_node( mentor->data.mentor_data.mentees_bst_root, mentee);
-   mentor->data.mentor_data.mentees_bst_root = insert_bst_node(mentor->data.mentor_data.mentees_bst_root, mentee);
-    
+   mentor->data.mentor_data.mentees_bst_root = remove_bst_node(mentor->data.mentor_data.mentees_bst_root, mentee);
+   // Calculate meeting count once
+   int count = 0;
+   Meeting_note* note = mentee->data.mentee_data.meeting_notes;
+   while (note) {
+       count++;
+       note = note->next;
+   }
+   mentor->data.mentor_data.mentees_bst_root = insert_bst_node(mentor->data.mentor_data.mentees_bst_root, mentee, count);
    return true;
 }
 
@@ -336,7 +336,8 @@ User* register_mentee(char* username, char* password, char* name, char* email, c
     
     if (add_user(mentee)) {
         // Add mentee to mentor's BST
-        mentor->data.mentor_data.mentees_bst_root = insert_bst_node(mentor->data.mentor_data.mentees_bst_root, mentee);
+        int count = 0;
+mentor->data.mentor_data.mentees_bst_root = insert_bst_node(mentor->data.mentor_data.mentees_bst_root, mentee, count);
         return mentee;
     }
     
@@ -563,8 +564,14 @@ void load_users_from_file() {
                     
                     // Add mentee to mentor's BST
                     if (user->data.mentee_data.mentor) {
+                        int count = 0;
+                        Meeting_note* note = user->data.mentee_data.meeting_notes;
+                        while (note) {
+                            count++;
+                            note = note->next;
+                        }
                         user->data.mentee_data.mentor->data.mentor_data.mentees_bst_root = 
-                            insert_bst_node(user->data.mentee_data.mentor->data.mentor_data.mentees_bst_root, user);
+                            insert_bst_node(user->data.mentee_data.mentor->data.mentor_data.mentees_bst_root, user, count);
                     }
                 }
                 mentee_index++;
