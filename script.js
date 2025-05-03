@@ -308,9 +308,9 @@ async function login(username, password) {
         const response = await fetch("/api/login", {
             method: "POST",
             headers: {
-                "Content-Type": "application/x-www-form-urlencoded"
+                "Content-Type": "application/json"
             },
-            body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
+            body: JSON.stringify({ username, password })
         });
         
         const data = await response.json();
@@ -335,7 +335,10 @@ async function login(username, password) {
 async function logout() {
     try {
         await fetch("/api/logout", {
-            method: "POST"
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            }
         });
         
         localStorage.removeItem("currentUser");
@@ -363,7 +366,6 @@ async function registerMentor(username, password, name, email, phone, department
             showError("Password must be at least 8 characters and contain at least one uppercase letter, one lowercase letter, and one number.");
             return;
         }
-        
         const checkUsernameResponse = await fetch(`/api/profile?username=${encodeURIComponent(username)}`);
         const checkUsernameData = await checkUsernameResponse.json();
         
@@ -371,15 +373,13 @@ async function registerMentor(username, password, name, email, phone, department
             showError("Username already exists. Please choose a different username.");
             return;
         }
-        
+
         const response = await fetch("/api/register_mentor", {
             method: "POST",
             headers: {
-                "Content-Type": "application/x-www-form-urlencoded"
+                "Content-Type": "application/json"
             },
-            body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&` +
-                  `name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}&` +
-                  `phone=${encodeURIComponent(phone)}&department=${encodeURIComponent(department)}`
+            body: JSON.stringify({ username, password, name, email, phone, department })
         });
         
         const data = await response.json();
@@ -441,20 +441,17 @@ async function registerMentee(username, password, name, email, phone, department
             showError("Username already exists. Please choose a different username.");
             return;
         }
-        
+
         const response = await fetch("/api/register_mentee", {
             method: "POST",
             headers: {
-                "Content-Type": "application/x-www-form-urlencoded"
+                "Content-Type": "application/json"
             },
-            body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&` +
-                  `name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}&` +
-                  `phone=${encodeURIComponent(phone)}&department=${encodeURIComponent(department)}&` +
-                  `year=${encodeURIComponent(year)}&digitalId=${encodeURIComponent(digitalId)}&` +
-                  `registrationNumber=${encodeURIComponent(registrationNumber)}&` +
-                  `parentName=${encodeURIComponent(parentName)}&parentEmail=${encodeURIComponent(parentEmail)}&` +
-                  `parentContact=${encodeURIComponent(parentContact)}&` +
-                  `mentorUsername=${encodeURIComponent(mentorUsername)}`
+            body: JSON.stringify({
+                username, password, name, email, phone, department,
+                year: parseInt(year), digitalId, registrationNumber,
+                parentName, parentEmail, parentContact, mentorUsername
+            })
         });
         
         const data = await response.json();
@@ -906,12 +903,42 @@ async function loadProfile() {
             const profile = data.profile;
             
             
+            let mentorContactHtml = '';
+            try {
+                const mentorResponse = await fetch("/api/mentors");
+                const mentorData = await mentorResponse.json();
+                
+                if (mentorData.success && mentorData.mentors && mentorData.mentors.length > 0) {
+                    const mentor = mentorData.mentors.find(m => m.name === profile.mentorName);
+                    
+                    if (mentor) {
+                        const mentorProfileResponse = await fetch(`/api/profile?username=${encodeURIComponent(mentor.username)}`);
+                        const mentorProfileData = await mentorProfileResponse.json();
+                        
+                        if (mentorProfileData.success) {
+                            const mentorProfile = mentorProfileData.profile;
+                            mentorContactHtml = `
+                                <div class="mentor-contact">
+                                    <p><strong>Email:</strong> ${mentorProfile.email}</p>
+                                    <p><strong>Phone:</strong> ${mentorProfile.phone}</p>
+                                    <p><strong>Department:</strong> ${mentorProfile.department}</p>
+                                </div>
+                            `;
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error("Error fetching mentor details:", error);
+                mentorContactHtml = "<p>Could not load mentor contact details</p>";
+            }
+            
+            // Create mentor section with the fetched contact details
             const mentorSection = document.createElement("div");
             mentorSection.className = "mentor-info-card";
             mentorSection.innerHTML = `
                 <h3>My Mentor</h3>
                 <p><strong>Name:</strong> ${profile.mentorName}</p>
-                <div id="mentor-contact-details">Loading mentor contact details...</div>
+                <div id="mentor-contact-details">${mentorContactHtml}</div>
             `;
             
             
@@ -942,13 +969,10 @@ async function loadProfile() {
             profileContainer.appendChild(studentSection);
             
             
-            fetchMentorDetails(profile.mentorName);
-            
             
             document.getElementById("edit-profile-button").addEventListener("click", function() {
                 document.getElementById("profile-modal").style.display = "block";
-                
-                
+
                 document.getElementById("edit-name").value = profile.name;
                 document.getElementById("edit-email").value = profile.email;
                 document.getElementById("edit-phone").value = profile.phone;
@@ -976,8 +1000,7 @@ async function loadProfile() {
                     const parentEmail = document.getElementById("edit-parent-email").value;
                     const parentContact = document.getElementById("edit-parent-contact").value;
                     
-                    updateProfile(name, email, phone, department, year, digitalId, registrationNumber, 
-                                 parentName, parentEmail, parentContact);
+                    updateProfile(name, email, phone, department, year, digitalId, registrationNumber, parentName, parentEmail, parentContact);
                 });
             });
         } else {
@@ -988,42 +1011,6 @@ async function loadProfile() {
     }
 }
 
-async function fetchMentorDetails(mentorName) {
-    try {
-        const response = await fetch("/api/mentors");
-        const data = await response.json();
-        
-        if (data.success && data.mentors && data.mentors.length > 0) {
-            const mentor = data.mentors.find(m => m.name === mentorName);
-            
-            if (mentor) {
-                const profileResponse = await fetch(`/api/profile?username=${encodeURIComponent(mentor.username)}`);
-                const profileData = await profileResponse.json();
-                
-                if (profileData.success) { 
-                    const mentorProfile = profileData.profile;
-                    const mentorContactElement = document.getElementById("mentor-contact-details");
-                    
-                    if (mentorContactElement) {
-                        mentorContactElement.innerHTML = `
-                            <div class="mentor-contact">
-                                <p><strong>Email:</strong> ${mentorProfile.email}</p>
-                                <p><strong>Phone:</strong> ${mentorProfile.phone}</p>
-                                <p><strong>Department:</strong> ${mentorProfile.department}</p>
-                            </div>
-                        `;
-                    }
-                }
-            }
-        }
-    } catch (error) {
-        console.error("Error fetching mentor details:", error);
-        const mentorContactElement = document.getElementById("mentor-contact-details");
-        if (mentorContactElement) {
-            mentorContactElement.innerHTML = "<p>Could not load mentor contact details</p>";
-        }
-    }
-}
 
 async function updateProfile(name, email, phone, department, year, digitalId, registrationNumber, parentName, parentEmail, parentContact) {
     try {
@@ -1052,7 +1039,6 @@ async function updateProfile(name, email, phone, department, year, digitalId, re
             return;
         }
         
-        
         if (!validateParentContact(parentContact)) {
             showError("Invalid Parent Contact. Please provide a valid 10-digit phone number.");
             return;
@@ -1061,15 +1047,14 @@ async function updateProfile(name, email, phone, department, year, digitalId, re
         const response = await fetch("/api/update_profile", {
             method: "POST",
             headers: {
-                "Content-Type": "application/x-www-form-urlencoded"
+                "Content-Type": "application/json"
             },
-            body: `username=${encodeURIComponent(currentUser.username)}&` +
-                  `name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}&` +
-                  `phone=${encodeURIComponent(phone)}&department=${encodeURIComponent(department)}&` +
-                  `year=${encodeURIComponent(year)}&digitalId=${encodeURIComponent(digitalId)}&` +
-                  `registrationNumber=${encodeURIComponent(registrationNumber)}&` +
-                  `parentName=${encodeURIComponent(parentName)}&parentEmail=${encodeURIComponent(parentEmail)}&` +
-                  `parentContact=${encodeURIComponent(parentContact)}`
+            body: JSON.stringify({
+                username: currentUser.username,
+                name, email, phone, department,
+                year: parseInt(year), digitalId, registrationNumber,
+                parentName, parentEmail, parentContact
+            })
         });
         
         const data = await response.json();
@@ -1096,11 +1081,13 @@ async function addTask(menteeUsername, description, dueDate) {
         const response = await fetch("/api/add_task", {
             method: "POST",
             headers: {
-                "Content-Type": "application/x-www-form-urlencoded"
+                "Content-Type": "application/json"
             },
-            body: `mentee=${encodeURIComponent(menteeUsername)}&` +
-                  `description=${encodeURIComponent(description)}&` +
-                  `dueDate=${encodeURIComponent(dueDate)}`
+            body: JSON.stringify({
+                mentee: menteeUsername,
+                description,
+                dueDate
+            })
         });
         
         const data = await response.json();
@@ -1130,12 +1117,14 @@ async function editTask(menteeUsername, taskIndex, description, dueDate, menteeN
         const response = await fetch("/api/edit_task", {
             method: "POST",
             headers: {
-                "Content-Type": "application/x-www-form-urlencoded"
+                "Content-Type": "application/json"
             },
-            body: `mentee=${encodeURIComponent(menteeUsername)}&` +
-                  `index=${encodeURIComponent(taskIndex)}&` +
-                  `description=${encodeURIComponent(description)}&` +
-                  `dueDate=${encodeURIComponent(dueDate)}`
+            body: JSON.stringify({
+                mentee: menteeUsername,
+                index: taskIndex,
+                description,
+                dueDate
+            })
         });
         
         const data = await response.json();
@@ -1161,10 +1150,12 @@ async function deleteTask(menteeUsername, taskIndex, menteeName) {
         const response = await fetch("/api/delete_task", {
             method: "POST",
             headers: {
-                "Content-Type": "application/x-www-form-urlencoded"
+                "Content-Type": "application/json"
             },
-            body: `mentee=${encodeURIComponent(menteeUsername)}&` +
-                  `index=${encodeURIComponent(taskIndex)}`
+            body: JSON.stringify({
+                mentee: menteeUsername,
+                index: taskIndex
+            })
         });
         
         const data = await response.json();
@@ -1190,11 +1181,13 @@ async function addMeetingNote(menteeUsername, date, summary) {
         const response = await fetch("/api/add_meeting", {
             method: "POST",
             headers: {
-                "Content-Type": "application/x-www-form-urlencoded"
+                "Content-Type": "application/json"
             },
-            body: `mentee=${encodeURIComponent(menteeUsername)}&` +
-                  `date=${encodeURIComponent(date)}&` +
-                  `summary=${encodeURIComponent(summary)}`
+            body: JSON.stringify({
+                mentee: menteeUsername,
+                date,
+                summary
+            })
         });
         
         const data = await response.json();
@@ -1226,12 +1219,14 @@ async function editMeetingNote(menteeUsername, noteIndex, date, summary, menteeN
         const response = await fetch("/api/edit_meeting", {
             method: "POST",
             headers: {
-                "Content-Type": "application/x-www-form-urlencoded"
+                "Content-Type": "application/json"
             },
-            body: `mentee=${encodeURIComponent(menteeUsername)}&` +
-                  `index=${encodeURIComponent(noteIndex)}&` +
-                  `date=${encodeURIComponent(date)}&` +
-                  `summary=${encodeURIComponent(summary)}`
+            body: JSON.stringify({
+                mentee: menteeUsername,
+                index: noteIndex,
+                date,
+                summary
+            })
         });
         
         const data = await response.json();
@@ -1257,10 +1252,12 @@ async function deleteMeetingNote(menteeUsername, noteIndex, menteeName) {
         const response = await fetch("/api/delete_meeting", {
             method: "POST",
             headers: {
-                "Content-Type": "application/x-www-form-urlencoded"
+                "Content-Type": "application/json"
             },
-            body: `mentee=${encodeURIComponent(menteeUsername)}&` +
-                  `index=${encodeURIComponent(noteIndex)}`
+            body: JSON.stringify({
+                mentee: menteeUsername,
+                index: noteIndex
+            })
         });
         
         const data = await response.json();
@@ -1304,7 +1301,7 @@ function validateName(name) {
 }
 
 function validatePassword(password) {
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
     return passwordRegex.test(password);
 }
 

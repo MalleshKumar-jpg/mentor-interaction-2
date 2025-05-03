@@ -1,12 +1,16 @@
 #include "backend.h"
 
-//global 
 User* hash_table[HASH_TABLE_SIZE] = {NULL};
 User* current_user = NULL;
 User* mentor_list[MAX_MENTORS] = {NULL};
 int mentor_count = 0;
 
-//hash function
+//structure for loading mentors properly for load_users
+typedef struct {
+    char mentee_username[MAX_USERNAME_LENGTH];
+    char mentor_username[MAX_USERNAME_LENGTH];
+} mentor_mapping;
+
 unsigned int hash(char* username) {
     unsigned int hash_value = 0;
     for (int i = 0; username[i] != '\0'; i++) {
@@ -15,7 +19,6 @@ unsigned int hash(char* username) {
     return hash_value % HASH_TABLE_SIZE;
 }
 
-// Modified create_bst_node to accept pre-calculated meeting count
 MenteeBSTNode* create_bst_node(User* mentee, int meeting_count) {
     MenteeBSTNode* node = (MenteeBSTNode*)malloc(sizeof(MenteeBSTNode));
 
@@ -28,14 +31,12 @@ MenteeBSTNode* create_bst_node(User* mentee, int meeting_count) {
     return node;
 }
 
-// Modified insert_bst_node to accept pre-calculated meeting count
 MenteeBSTNode* insert_bst_node(MenteeBSTNode* root, User* mentee, int meeting_count) {
     if (root == NULL) {
        MenteeBSTNode* node = create_bst_node(mentee, meeting_count);
        return node;
     }
     
-    // Sort by meeting count in descending order
     if (meeting_count > root->meeting_count) {
         root->left = insert_bst_node(root->left, mentee, meeting_count);
     } else {
@@ -45,62 +46,93 @@ MenteeBSTNode* insert_bst_node(MenteeBSTNode* root, User* mentee, int meeting_co
     return root;
 }
 
-MenteeBSTNode* find_mentee_in_bst(MenteeBSTNode* root, User* mentee) {
-   if (root == NULL) {
-       return NULL;
-   }
-   
-   if (root->mentee == mentee) {
-       return root;
-   }
-   else if (find_mentee_in_bst(root->left, mentee) != NULL) {
-       return find_mentee_in_bst(root->left, mentee);
-   }
-   else {
-       return find_mentee_in_bst(root->right, mentee);
-   }
-}
-
-MenteeBSTNode* remove_bst_node(MenteeBSTNode* root, User* mentee) {
+MenteeBSTNode* find_mentee_in_bst(MenteeBSTNode* root, User* mentee, int meeting_count) {
     if (root == NULL) {
         return NULL;
     }
     
-    if (root->mentee == mentee) {
-        //incase node has one child or no child
-        if (root->left == NULL) {
-            MenteeBSTNode* temp = root->right;
-            free(root);
-            return temp;
-        } else if (root->right == NULL) {
-            MenteeBSTNode* temp = root->left;
-            free(root);
-            return temp;
+    if (meeting_count > root->meeting_count) {
+        return find_mentee_in_bst(root->left, mentee, meeting_count);
+    } 
+    else if (meeting_count < root->meeting_count) {
+        return find_mentee_in_bst(root->right, mentee, meeting_count);
+    }
+    else {
+        // Same meeting count
+        if (root->mentee == mentee) {
+            return root;
         }
         
-        //incasethe node has two children
-
-        //the following code is basically findmin()
-        MenteeBSTNode* right_min = root->right;
-        while (right_min->left != NULL) {
-            right_min = right_min->left;
+        //if not the mentee we want to find , again search 
+        MenteeBSTNode* result = find_mentee_in_bst(root->left, mentee, meeting_count);
+        if (result != NULL) {
+            return result;
         }
-        
-        // copy the right_min data to root 
-        root->mentee = right_min->mentee;
-        root->meeting_count = right_min->meeting_count;
-        
-        //delete the right_min
-        root->right = remove_bst_node(root->right, right_min->mentee);
+        return find_mentee_in_bst(root->right, mentee, meeting_count);
+    }
+}
 
-    } else {
-        root->left = remove_bst_node(root->left, mentee);
-        root->right = remove_bst_node(root->right, mentee);
+int count_meeting_notes(User* mentee) {
+    int count = 0;
+    Meeting_note* note = mentee->data.mentee_data.meeting_notes;
+    while (note) {
+        count++;
+        note = note->next;
+    }
+    return count;
+}
+
+MenteeBSTNode* remove_bst_node(MenteeBSTNode* root, User* mentee, int meeting_count) {
+    if (root == NULL) {
+        return NULL;
+    }
+    
+    if (meeting_count > root->meeting_count) {
+        root->left = remove_bst_node(root->left, mentee, meeting_count);
+    } 
+    else if (meeting_count < root->meeting_count) {
+        root->right = remove_bst_node(root->right, mentee, meeting_count);
+    }
+    else {
+        //same meeting count, check if this is the node to remove
+        if (root->mentee == mentee) {
+            //single or no child 
+            if (root->left == NULL) {
+                MenteeBSTNode* temp = root->right;
+                free(root);
+                return temp;
+            } 
+            else if (root->right == NULL) {
+                MenteeBSTNode* temp = root->left;
+                free(root);
+                return temp;
+            }
+            
+            //find in-order successor
+            MenteeBSTNode* right_min = root->right;
+            while (right_min->left != NULL) {
+                right_min = right_min->left;
+            }
+            
+            root->mentee = right_min->mentee;
+            root->meeting_count = right_min->meeting_count;
+            
+            root->right = remove_bst_node(root->right, right_min->mentee, right_min->meeting_count);
+        } else {
+            //same count but different mentee
+            //check if the mentee exists in the left subtree
+            MenteeBSTNode* found_in_left = find_mentee_in_bst(root->left, mentee, meeting_count);
+            
+            if (found_in_left != NULL) {
+                root->left = remove_bst_node(root->left, mentee, meeting_count);
+            } else {
+                root->right = remove_bst_node(root->right, mentee, meeting_count);
+            }
+        }
     }
     
     return root;
 }
-
 
 //returns the user structure with given username
 User* find_user(char* username) {
@@ -151,7 +183,6 @@ void logout() {
     current_user = NULL;
 }
 
-// Task functions
 
 Task* create_task(char* description, char* due_date) {
     Task* task = (Task*)malloc(sizeof(Task));
@@ -182,7 +213,7 @@ bool delete_task(User* mentee, int task_index) { //task_index is input based on 
    if (task_index == 0) {
        Task* first_task = mentee->data.mentee_data.tasks;
        if (first_task == NULL) {
-           return false;  // No tasks to delete
+           return false;  
        }
        mentee->data.mentee_data.tasks = first_task->next;
        free(first_task);
@@ -220,33 +251,32 @@ Meeting_note* create_meeting_note(char* date, char* summary) {
 }
 
 bool add_meeting_note(User* mentee, char* date, char* summary) {
-   
     Meeting_note* note = create_meeting_note(date, summary);
     if (!note) {
         return false;
     }
     
+    // Calculate the old meeting count before adding the new note
+    int old_count = count_meeting_notes(mentee);
+    
     note->next = mentee->data.mentee_data.meeting_notes;
     mentee->data.mentee_data.meeting_notes = note;
     
-    //update mentor's BST since the key (meeting count) has changed , the structure of BST is compromised
-    //we update by deleting that mentee from BST and adding again
+    //remove mentee from BST first
     User* mentor = mentee->data.mentee_data.mentor;
-    mentor->data.mentor_data.mentees_bst_root = remove_bst_node(mentor->data.mentor_data.mentees_bst_root, mentee);
+    mentor->data.mentor_data.mentees_bst_root = remove_bst_node(mentor->data.mentor_data.mentees_bst_root, mentee, old_count);
     
-    // Calculate meeting count once
-    int count = 0;
-    Meeting_note* temp_note = mentee->data.mentee_data.meeting_notes;
-    while (temp_note) {
-        count++;
-        temp_note = temp_note->next;
-    }
+    // The new count is old_count + 1 
+    int new_count = old_count + 1;
+    //insert mentee again
+    mentor->data.mentor_data.mentees_bst_root = insert_bst_node(mentor->data.mentor_data.mentees_bst_root, mentee, new_count);
     
-    mentor->data.mentor_data.mentees_bst_root = insert_bst_node(mentor->data.mentor_data.mentees_bst_root, mentee, count);
     return true;
- }
+}
 
 bool delete_meeting_note(User* mentee, int note_index) {
+    //calculate the old meeting count before deleting the note
+    int old_count = count_meeting_notes(mentee);
     
     Meeting_note* current = mentee->data.mentee_data.meeting_notes;
     Meeting_note* prev = NULL;
@@ -270,18 +300,14 @@ bool delete_meeting_note(User* mentee, int note_index) {
     
     free(current);
     
-  //same reason as above function
-   User* mentor = mentee->data.mentee_data.mentor;
-   mentor->data.mentor_data.mentees_bst_root = remove_bst_node(mentor->data.mentor_data.mentees_bst_root, mentee);
-   // Calculate meeting count once
-   int count = 0;
-   Meeting_note* note = mentee->data.mentee_data.meeting_notes;
-   while (note) {
-       count++;
-       note = note->next;
-   }
-   mentor->data.mentor_data.mentees_bst_root = insert_bst_node(mentor->data.mentor_data.mentees_bst_root, mentee, count);
-   return true;
+    //similar to previous function
+    User* mentor = mentee->data.mentee_data.mentor;
+    mentor->data.mentor_data.mentees_bst_root = remove_bst_node(mentor->data.mentor_data.mentees_bst_root, mentee, old_count);
+    
+    int new_count = old_count - 1;
+    
+    mentor->data.mentor_data.mentees_bst_root = insert_bst_node(mentor->data.mentor_data.mentees_bst_root, mentee, new_count);
+    return true;
 }
 
 User* register_mentor(char* username, char* password, char* name, char* email, char* phone, char* department) {
@@ -335,9 +361,9 @@ User* register_mentee(char* username, char* password, char* name, char* email, c
     mentee->next = NULL;
     
     if (add_user(mentee)) {
-        // Add mentee to mentor's BST
+        // Add mentee to mentor's BST with initial meeting count of 0
         int count = 0;
-mentor->data.mentor_data.mentees_bst_root = insert_bst_node(mentor->data.mentor_data.mentees_bst_root, mentee, count);
+        mentor->data.mentor_data.mentees_bst_root = insert_bst_node(mentor->data.mentor_data.mentees_bst_root, mentee, count);
         return mentee;
     }
     
@@ -437,7 +463,7 @@ void load_users_from_file() {
         return;
     }
     
-    //clear existed hash tables and m
+    // Clear existing hash tables
     for (int i = 0; i < HASH_TABLE_SIZE; i++) {
         User* user = hash_table[i];
         while (user) {
@@ -451,11 +477,10 @@ void load_users_from_file() {
     memset(mentor_list, 0, sizeof(mentor_list));
     mentor_count = 0;
     
-    // Create a temporary array to store mentor usernames for each mentee
-    char mentor_usernames[HASH_TABLE_SIZE][MAX_USERNAME_LENGTH];
+    
+    mentor_mapping mentor_mappings[HASH_TABLE_SIZE];
     int mentee_count = 0;
     
-    // Read users
     while (!feof(file)) {
         User* user = (User*)malloc(sizeof(User));
         if (!user) {
@@ -485,13 +510,14 @@ void load_users_from_file() {
             fread(user->data.mentee_data.parent_name, sizeof(char), MAX_NAME_LENGTH, file);
             fread(user->data.mentee_data.parent_email, sizeof(char), MAX_EMAIL_LENGTH, file);
 
-            // Read mentor username
+            // Read mentor username and store the mapping
             char mentor_username[MAX_USERNAME_LENGTH];
             fread(mentor_username, sizeof(char), MAX_USERNAME_LENGTH, file);
             
-            // Store mentor username for later processing
+            // Store mentee username and their mentor username in our mapping
             if (mentee_count < HASH_TABLE_SIZE) {
-                strncpy(mentor_usernames[mentee_count], mentor_username, MAX_USERNAME_LENGTH);
+                strncpy(mentor_mappings[mentee_count].mentee_username, user->username, MAX_USERNAME_LENGTH);
+                strncpy(mentor_mappings[mentee_count].mentor_username, mentor_username, MAX_USERNAME_LENGTH);
                 mentee_count++;
             }
             
@@ -518,7 +544,6 @@ void load_users_from_file() {
                 user->data.mentee_data.tasks = task;
             }
             
-            // Read meeting notes
             int note_count;
             fread(&note_count, sizeof(int), 1, file);
             
@@ -532,49 +557,49 @@ void load_users_from_file() {
                 fread(note->summary, sizeof(char), MAX_SUMMARY_LENGTH, file);
                 note->next = NULL;
                 
-                // Add note to mentee's note list
                 note->next = user->data.mentee_data.meeting_notes;
                 user->data.mentee_data.meeting_notes = note;
             }
         } else if (user->role == MENTOR) {
             user->data.mentor_data.mentees_bst_root = NULL;
             
-            // Add to mentor list
             if (mentor_count < MAX_MENTORS) {
                 mentor_list[mentor_count++] = user;
             }
         }
         
-        // Add to hash table
         unsigned int index = hash(user->username);
         user->next = hash_table[index];
         hash_table[index] = user;
     }
     
     fclose(file);
-    
-    // Set mentor pointers for mentees
-    int mentee_index = 0;
+
     for (int i = 0; i < HASH_TABLE_SIZE; i++) {
         User* user = hash_table[i];
         while (user) {
-            if (user->role == MENTEE && mentee_index < mentee_count) {
-                if (strlen(mentor_usernames[mentee_index]) > 0) {
-                    user->data.mentee_data.mentor = find_user(mentor_usernames[mentee_index]);
-                    
-                    // Add mentee to mentor's BST
-                    if (user->data.mentee_data.mentor) {
-                        int count = 0;
-                        Meeting_note* note = user->data.mentee_data.meeting_notes;
-                        while (note) {
-                            count++;
-                            note = note->next;
+            if (user->role == MENTEE) {
+                //finding mentees index in mentee_username and using that index to find the mentor index
+                for (int j = 0; j < mentee_count; j++) {
+                    if (strcmp(user->username, mentor_mappings[j].mentee_username) == 0) {
+                        if (strlen(mentor_mappings[j].mentor_username) > 0) {
+                            user->data.mentee_data.mentor = find_user(mentor_mappings[j].mentor_username);
+                            
+                            //add mentee to mentor bst
+                            if (user->data.mentee_data.mentor) {
+                                
+                                int count = 0;
+                                Meeting_note* note = user->data.mentee_data.meeting_notes;
+                                while (note) {
+                                    count++;
+                                    note = note->next;
+                                }
+                                user->data.mentee_data.mentor->data.mentor_data.mentees_bst_root = insert_bst_node(user->data.mentee_data.mentor->data.mentor_data.mentees_bst_root, user, count);
+                            }
                         }
-                        user->data.mentee_data.mentor->data.mentor_data.mentees_bst_root = 
-                            insert_bst_node(user->data.mentee_data.mentor->data.mentor_data.mentees_bst_root, user, count);
+                        break; 
                     }
                 }
-                mentee_index++;
             }
             user = user->next;
         }
@@ -600,12 +625,9 @@ int count_mentees(MenteeBSTNode* root) {
 }
 
 User** get_sorted_mentees(User* mentor, int* count) {
-    if (mentor->role != MENTOR) {
-        *count = 0;
-        return NULL;
-    }
     
     *count = count_mentees(mentor->data.mentor_data.mentees_bst_root);
+
     User** mentees = (User**)malloc(sizeof(User*) * (*count));
     if (!mentees) {
         *count = 0;
@@ -826,4 +848,4 @@ Meeting_note** api_get_meeting_notes(char* mentee_username, int* count) {
    }
    
    return notes;
-   }
+}
