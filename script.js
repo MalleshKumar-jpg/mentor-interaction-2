@@ -151,13 +151,10 @@ function setupMentorDashboard() {
     setupModals();
 }
 
-
-
 function setupMenteeDashboard() {
     document.getElementById("user-name").textContent = currentUser.name;
     document.getElementById("logout-button").addEventListener("click", logout);
     
-
     const tabButtons = document.querySelectorAll(".tab-button");
     tabButtons.forEach(button => {
         button.addEventListener("click", function() {

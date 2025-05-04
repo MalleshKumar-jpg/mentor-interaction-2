@@ -587,13 +587,7 @@ void load_users_from_file() {
                             
                             //add mentee to mentor bst
                             if (user->data.mentee_data.mentor) {
-                                
-                                int count = 0;
-                                Meeting_note* note = user->data.mentee_data.meeting_notes;
-                                while (note) {
-                                    count++;
-                                    note = note->next;
-                                }
+                                int count = count_meeting_notes(user);
                                 user->data.mentee_data.mentor->data.mentor_data.mentees_bst_root = insert_bst_node(user->data.mentee_data.mentor->data.mentor_data.mentees_bst_root, user, count);
                             }
                         }

@@ -1,17 +1,13 @@
 {
-    "name": "mentorship-system",
-    "version": "1.0.0",
-    "description": "Mentorship System with Node.js and C backend",
-    "main": "server.js",
-    "scripts": {
-      "start": "node server.js",
-      "build-backend": "gcc -o backend_cli backend_cli.c backend.c",
-      "dev": "npm run build-backend && npm start"
-    },
-    "dependencies": {
-      "express": "^4.18.2",
-      "body-parser": "^1.20.2"
-    },
-    "author": "",
-    "license": "ISC"
+  "name": "mentorship-system",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "build-backend": "gcc -o backend_cli backend_cli.c backend.c",
+    "dev": "npm run build-backend && npm start"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "body-parser": "^1.20.2"
   }
+}

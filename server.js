@@ -6,23 +6,23 @@ const app = express();
 const port = 8081;
 
 // Middleware
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({ extended: true })); 
 app.use(bodyParser.json());
-app.use(express.static('.'));
+app.use(express.static('.')); 
 
 // Helper function to execute backend
 function executeBackend(command, args) {
-    return new Promise((resolve, reject) => {
-        execFile('./backend_cli', [command, ...args], (error, stdout, stderr) => {
-            if (error) {
+    return new Promise((resolve, reject) => { 
+        execFile('./backend_cli', [command, ...args], (error, stdout) => {
+            if (error) { //error during compilation of c
                 console.error('Backend error:', error);
                 resolve({ success: false, message: 'Server error' });
                 return;
             }
-            try {
+            try { 
                 const result = JSON.parse(stdout);
                 resolve(result);
-            } catch (e) {
+            } catch (e) { //error during parsing to json
                 console.error('Parse error:', e);
                 console.error('Backend output:', stdout);
                 resolve({ success: false, message: 'Invalid response from backend' });

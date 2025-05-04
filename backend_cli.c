@@ -50,8 +50,7 @@ int main(int argc, char* argv[]) {
     }
     else if (strcmp(command, "register_mentee") == 0 && argc == 15) {
         int year = atoi(argv[8]);
-        User* mentee = api_register_mentee(argv[2], argv[3], argv[4], argv[5], argv[6], argv[7], 
-                                         year, argv[9], argv[10], argv[11], argv[12], argv[13], argv[14]);
+        User* mentee = api_register_mentee(argv[2], argv[3], argv[4], argv[5], argv[6], argv[7], year, argv[9], argv[10], argv[11], argv[12], argv[13], argv[14]);
         if (mentee) {
             printf("{\"success\":true,\"username\":");
             print_json_string(mentee->username);
@@ -185,8 +184,7 @@ int main(int argc, char* argv[]) {
     }
     else if (strcmp(command, "update_profile") == 0 && argc == 13) {
         int year = atoi(argv[7]);
-        bool success = api_update_mentee_info(argv[2], argv[3], argv[4], argv[5], argv[6], 
-                                            year, argv[8], argv[9], argv[10], argv[11], argv[12]);
+        bool success = api_update_mentee_info(argv[2], argv[3], argv[4], argv[5], argv[6], year, argv[8], argv[9], argv[10], argv[11], argv[12]);
         if (success) {
             printf("{\"success\":true}\n");
         } else {
