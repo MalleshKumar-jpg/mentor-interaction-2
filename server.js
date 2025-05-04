@@ -118,10 +118,7 @@ app.post('/api/delete_task', async (req, res) => {
 app.post('/api/edit_task', async (req, res) => {
     try {
         const { mentee, index, description, dueDate } = req.body;
-        // Delete old task
-        await executeBackend('delete_task', [mentee, index.toString()]);
-        // Add new task
-        const result = await executeBackend('add_task', [mentee, description, dueDate]);
+        const result = await executeBackend('edit_task', [mentee, index.toString(), description, dueDate]);
         res.json(result);
     } catch (error) {
         res.status(500).json({ success: false, message: 'Server error' });
@@ -142,6 +139,16 @@ app.post('/api/add_meeting', async (req, res) => {
     try {
         const { mentee, date, summary } = req.body;
         const result = await executeBackend('add_meeting', [mentee, date, summary]);
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+app.post('/api/edit_meeting', async (req, res) => {
+    try {
+        const { mentee, index, date, summary } = req.body;
+        const result = await executeBackend('edit_meeting', [mentee, index.toString(), date, summary]);
         res.json(result);
     } catch (error) {
         res.status(500).json({ success: false, message: 'Server error' });
@@ -196,11 +203,9 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Start server
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
     
-    // Optional: Open browser automatically
     const { exec } = require('child_process');
     const url = `http://localhost:${port}`;
     

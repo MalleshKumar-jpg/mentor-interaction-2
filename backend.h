@@ -88,8 +88,10 @@ User* api_register_mentor(char* username, char* password, char* name, char* emai
 bool api_update_mentee_info(char* username, char* name, char* email, char* phone, char* department, int year, char* digital_id, char* registration_number, char* parent_name, char* parent_email, char* parent_contact);
 
 bool api_add_task(char* mentee_username, char* description, char* due_date);
+bool api_edit_task(char* mentee_username, int task_index, char* description, char* due_date);
 bool api_delete_task(char* mentee_username, int task_index);
 bool api_add_meeting_note(char* mentee_username, char* date, char* summary);
+bool api_edit_meeting_note(char* mentee_username, int note_index, char* date, char* summary);
 bool api_delete_meeting_note(char* mentee_username, int note_index);
 User** api_get_mentors(int* count);
 User** api_get_mentees(char* mentor_username, int* count);

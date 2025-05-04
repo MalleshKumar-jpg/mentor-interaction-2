@@ -138,6 +138,15 @@ int main(int argc, char* argv[]) {
             printf("{\"success\":false,\"message\":\"Failed to add task\"}\n");
         }
     }
+    else if (strcmp(command, "edit_task") == 0 && argc == 6) {
+        int index = atoi(argv[3]);
+        bool success = api_edit_task(argv[2], index, argv[4], argv[5]);
+        if (success) {
+            printf("{\"success\":true}\n");
+        } else {
+            printf("{\"success\":false,\"message\":\"Failed to edit task\"}\n");
+        }
+    }
     else if (strcmp(command, "delete_task") == 0 && argc == 4) {
         int index = atoi(argv[3]);
         bool success = api_delete_task(argv[2], index);
@@ -171,6 +180,15 @@ int main(int argc, char* argv[]) {
             printf("{\"success\":true}\n");
         } else {
             printf("{\"success\":false,\"message\":\"Failed to add meeting note\"}\n");
+        }
+    }
+    else if (strcmp(command, "edit_meeting") == 0 && argc == 6) {
+        int index = atoi(argv[3]);
+        bool success = api_edit_meeting_note(argv[2], index, argv[4], argv[5]);
+        if (success) {
+            printf("{\"success\":true}\n");
+        } else {
+            printf("{\"success\":false,\"message\":\"Failed to edit meeting note\"}\n");
         }
     }
     else if (strcmp(command, "delete_meeting") == 0 && argc == 4) {

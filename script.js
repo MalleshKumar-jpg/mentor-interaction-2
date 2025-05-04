@@ -1352,7 +1352,7 @@ function validateBackendDateFormat(dateString) {
     return dateRegex.test(dateString);
 }
 
-// yyyy-mm-dd to dd-mm-yyyy for backendxx
+// yyyy-mm-dd to dd-mm-yyyy for backend
 function formatDateForBackend(dateString) {
     const parts = dateString.split('-');
     if (parts.length === 3) {

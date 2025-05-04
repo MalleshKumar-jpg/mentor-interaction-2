@@ -63,11 +63,7 @@ MenteeBSTNode* find_mentee_in_bst(MenteeBSTNode* root, User* mentee, int meeting
             return root;
         }
         
-        //if not the mentee we want to find , again search 
-        MenteeBSTNode* result = find_mentee_in_bst(root->left, mentee, meeting_count);
-        if (result != NULL) {
-            return result;
-        }
+        // For equal counts, we always insert to the right, so search right
         return find_mentee_in_bst(root->right, mentee, meeting_count);
     }
 }
@@ -94,9 +90,9 @@ MenteeBSTNode* remove_bst_node(MenteeBSTNode* root, User* mentee, int meeting_co
         root->right = remove_bst_node(root->right, mentee, meeting_count);
     }
     else {
-        //same meeting count, check if this is the node to remove
+        // Same meeting count
         if (root->mentee == mentee) {
-            //single or no child 
+            // Standard BST removal logic
             if (root->left == NULL) {
                 MenteeBSTNode* temp = root->right;
                 free(root);
@@ -108,26 +104,19 @@ MenteeBSTNode* remove_bst_node(MenteeBSTNode* root, User* mentee, int meeting_co
                 return temp;
             }
             
-            //find in-order successor
-            MenteeBSTNode* right_min = root->right;
-            while (right_min->left != NULL) {
-                right_min = right_min->left;
+            // Node with two children
+            MenteeBSTNode* temp = root->right;
+            while (temp->left != NULL) {
+                temp = temp->left;
             }
             
-            root->mentee = right_min->mentee;
-            root->meeting_count = right_min->meeting_count;
+            root->mentee = temp->mentee;
+            root->meeting_count = temp->meeting_count;
             
-            root->right = remove_bst_node(root->right, right_min->mentee, right_min->meeting_count);
+            root->right = remove_bst_node(root->right, temp->mentee, temp->meeting_count);
         } else {
-            //same count but different mentee
-            //check if the mentee exists in the left subtree
-            MenteeBSTNode* found_in_left = find_mentee_in_bst(root->left, mentee, meeting_count);
-            
-            if (found_in_left != NULL) {
-                root->left = remove_bst_node(root->left, mentee, meeting_count);
-            } else {
-                root->right = remove_bst_node(root->right, mentee, meeting_count);
-            }
+            //not this node, continue searching right (duplicate meeting_count go right)
+            root->right = remove_bst_node(root->right, mentee, meeting_count);
         }
     }
     
@@ -207,6 +196,26 @@ bool add_task(User* mentee, char* description, char* due_date) {
     return true;
 }
 
+bool edit_task(User* mentee, int task_index, char* description, char* due_date) {
+    Task* current = mentee->data.mentee_data.tasks;
+    int i = 0;
+    
+    while (current != NULL && i < task_index) {
+        current = current->next;
+        i++;
+    }
+    
+    if (current == NULL) {
+        return false;  // Task not found
+    }
+    
+    // Update the task in place
+    strncpy(current->description, description, MAX_DESCRIPTION_LENGTH);
+    strncpy(current->due_date, due_date, MAX_DATE_LENGTH);
+    
+    return true;
+}
+
 bool delete_task(User* mentee, int task_index) { //task_index is input based on the task user has chosen to delete (tasks are displayed in the website in the same order as linked list)
    
   //deleting the first task , so we replace the first node itself so we need to change the pointer in the mentee user struct 
@@ -270,6 +279,26 @@ bool add_meeting_note(User* mentee, char* date, char* summary) {
     int new_count = old_count + 1;
     //insert mentee again
     mentor->data.mentor_data.mentees_bst_root = insert_bst_node(mentor->data.mentor_data.mentees_bst_root, mentee, new_count);
+    
+    return true;
+}
+
+bool edit_meeting_note(User* mentee, int note_index, char* date, char* summary) {
+    Meeting_note* current = mentee->data.mentee_data.meeting_notes;
+    int i = 0;
+    
+    while (current != NULL && i < note_index) {
+        current = current->next;
+        i++;
+    }
+    
+    if (current == NULL) {
+        return false;  // Meeting note not found
+    }
+    
+    // Update the meeting note in place
+    strncpy(current->date, date, MAX_DATE_LENGTH);
+    strncpy(current->summary, summary, MAX_SUMMARY_LENGTH);
     
     return true;
 }
@@ -732,6 +761,19 @@ bool api_add_task(char* mentee_username, char* description, char* due_date) {
    return success;
 }
 
+bool api_edit_task(char* mentee_username, int task_index, char* description, char* due_date) {
+    User* mentee = find_user(mentee_username);
+    if (!mentee || mentee->role != MENTEE) {
+        return false;
+    }
+    
+    bool success = edit_task(mentee, task_index, description, due_date);
+    if (success) {
+        save_users_to_file();
+    }
+    return success;
+}
+
 bool api_delete_task(char* mentee_username, int task_index) {
    User* mentee = find_user(mentee_username);
    if (!mentee || mentee->role != MENTEE) {
@@ -756,6 +798,19 @@ bool api_add_meeting_note(char* mentee_username, char* date, char* summary) {
        save_users_to_file();
    }
    return success;
+}
+
+bool api_edit_meeting_note(char* mentee_username, int note_index, char* date, char* summary) {
+    User* mentee = find_user(mentee_username);
+    if (!mentee || mentee->role != MENTEE) {
+        return false;
+    }
+    
+    bool success = edit_meeting_note(mentee, note_index, date, summary);
+    if (success) {
+        save_users_to_file();
+    }
+    return success;
 }
 
 bool api_delete_meeting_note(char* mentee_username, int note_index) {
