@@ -559,28 +559,14 @@ async function loadMentees() {
                     const username = this.getAttribute("data-username");
                     const name = this.getAttribute("data-name");
                     document.getElementById("task-modal").style.display = "block";
-                    document.getElementById("task-form").reset();
-                    document.getElementById("task-mentee").value = username;
-                    document.getElementById("task-form-title").textContent = `Add Task for ${name}`;
-                    
-
-                    const taskForm = document.getElementById("task-form");
-                    taskForm.removeEventListener("submit", taskFormHandler);
-                    taskForm.addEventListener("submit", taskFormHandler);
+                    setupAddTaskForm(username, name);
                 });
                 
                 menteeItem.querySelector(".add-meeting").addEventListener("click", function() {
                     const username = this.getAttribute("data-username");
                     const name = this.getAttribute("data-name");
                     document.getElementById("meeting-modal").style.display = "block";
-                    document.getElementById("meeting-form").reset();
-                    document.getElementById("meeting-mentee").value = username;
-                    document.getElementById("meeting-form-title").textContent = `Add Meeting Note for ${name}`;
-                    
-
-                    const meetingForm = document.getElementById("meeting-form");
-                    meetingForm.removeEventListener("submit", meetingFormHandler);
-                    meetingForm.addEventListener("submit", meetingFormHandler);
+                    setupAddMeetingForm(username, name);
                 });
             });
         } else {
@@ -590,7 +576,6 @@ async function loadMentees() {
         showError("Server error. Please try again later.");
     }
 }
-
 async function viewMenteeTasks(menteeUsername, menteeName) {
     try {
         const response = await fetch(`/api/tasks?mentee=${encodeURIComponent(menteeUsername)}`);
@@ -600,7 +585,6 @@ async function viewMenteeTasks(menteeUsername, menteeName) {
             const tasksList = document.getElementById("tasks-list");
             tasksList.innerHTML = "";
 
-
             document.getElementById("tasks-heading").textContent = `${menteeName}'s Tasks`;
             
             if (data.tasks.length === 0) {
@@ -608,15 +592,35 @@ async function viewMenteeTasks(menteeUsername, menteeName) {
                 return;
             }
             
-            data.tasks.forEach((task, index) => {
+            // Create an array of tasks with their original indices
+            const tasksWithIndices = data.tasks.map((task, index) => ({
+                ...task,
+                originalIndex: index
+            }));
+            
+            // Sort tasks by due date (newest first)
+            const sortedTasks = tasksWithIndices.sort((a, b) => {
+                // Convert DD-MM-YYYY to Date objects for comparison
+                const datePartsA = a.dueDate.split('-');
+                const datePartsB = b.dueDate.split('-');
+                
+                // Create date objects in format YYYY-MM-DD
+                const dateA = new Date(`${datePartsA[2]}-${datePartsA[1]}-${datePartsA[0]}`);
+                const dateB = new Date(`${datePartsB[2]}-${datePartsB[1]}-${datePartsB[0]}`);
+                
+                // Sort newest first (reverse chronological)
+                return dateA - dateB;
+            });
+            
+            sortedTasks.forEach(task => {
                 const taskItem = document.createElement("div");
                 taskItem.className = "list-item";
                 taskItem.innerHTML = `
                     <h3>${task.description}</h3>
                     <p><strong>Due Date:</strong> ${task.dueDate}</p>
                     <div class="button-group">
-                        <button class="edit-task" data-index="${index}" data-mentee="${menteeUsername}" data-name="${menteeName}">Edit</button>
-                        <button class="delete-task delete" data-index="${index}" data-mentee="${menteeUsername}" data-name="${menteeName}">Delete</button>
+                        <button class="edit-task" data-index="${task.originalIndex}" data-mentee="${menteeUsername}" data-name="${menteeName}">Edit</button>
+                        <button class="delete-task delete" data-index="${task.originalIndex}" data-mentee="${menteeUsername}" data-name="${menteeName}">Delete</button>
                     </div>
                 `;
                 
@@ -636,44 +640,16 @@ async function viewMenteeTasks(menteeUsername, menteeName) {
                     
                     document.getElementById("task-modal").style.display = "block";
                     document.getElementById("task-form").reset();
-                    document.getElementById("task-mentee").value = mentee;
-                    document.getElementById("task-description").value = task.description;
-                    
-
+                
                     const formattedDate = formatDateForInput(task.dueDate);
-                    document.getElementById("task-due-date").value = formattedDate;
+                    setupTaskEditForm(mentee, index, task.description, formattedDate, name);
                     
-
+                    // Set min date for task due date
                     const today = new Date().toISOString().split('T')[0];
                     document.getElementById("task-due-date").min = today;
-                    
-                    document.getElementById("task-form-title").textContent = `Edit Task for ${name}`;
-                    
-
-                    const taskForm = document.getElementById("task-form");
-                    taskForm.removeEventListener("submit", taskFormHandler);
-                    taskForm.addEventListener("submit", function(e) {
-                        e.preventDefault();
-                        
-                        const menteeUsername = document.getElementById("task-mentee").value;
-                        const description = document.getElementById("task-description").value;
-                        const dueDateInput = document.getElementById("task-due-date");
-                        
-
-                        if (!validateTaskDate(dueDateInput.value)) {
-                            showError("Task due date must be today or in the future");
-                            return;
-                        }
-                        
-
-                        const dueDate = formatDateForBackend(dueDateInput.value);
-                        
-                        editTask(menteeUsername, index, description, dueDate, name);
-                    });
                 });
             });
             
-
             document.getElementById("mentees-tab").classList.remove("active");
             document.getElementById("tasks-tab").classList.add("active");
             
@@ -686,7 +662,6 @@ async function viewMenteeTasks(menteeUsername, menteeName) {
         showError("Server error. Please try again later.");
     }
 }
-
 async function viewMenteeMeetings(menteeUsername, menteeName) {
     try {
         const response = await fetch(`/api/meetings?mentee=${encodeURIComponent(menteeUsername)}`);
@@ -733,39 +708,13 @@ async function viewMenteeMeetings(menteeUsername, menteeName) {
                     
                     document.getElementById("meeting-modal").style.display = "block";
                     document.getElementById("meeting-form").reset();
-                    document.getElementById("meeting-mentee").value = mentee;
                     
-                   
                     const formattedDate = formatDateForInput(meeting.date);
-                    document.getElementById("meeting-date").value = formattedDate;
+                    setupMeetingEditForm(mentee, index, formattedDate, meeting.summary, name);
                     
-                    
+                    // Set max date for meeting date
                     const today = new Date().toISOString().split('T')[0];
                     document.getElementById("meeting-date").max = today;
-                    
-                    document.getElementById("meeting-summary").value = meeting.summary;
-                    document.getElementById("meeting-form-title").textContent = `Edit Meeting Note for ${name}`;
-                    
-                    const meetingForm = document.getElementById("meeting-form");
-                    meetingForm.removeEventListener("submit", meetingFormHandler);
-                    meetingForm.addEventListener("submit", function(e) {
-                        e.preventDefault();
-                        
-                        const menteeUsername = document.getElementById("meeting-mentee").value;
-                        const dateInput = document.getElementById("meeting-date");
-                        const summary = document.getElementById("meeting-summary").value;
-                        
-                        
-                        if (!validateMeetingDate(dateInput.value)) {
-                            showError("Meeting date must be today or in the past");
-                            return;
-                        }
-                        
-                        
-                        const date = formatDateForBackend(dateInput.value);
-                        
-                        editMeetingNote(menteeUsername, index, date, summary, name);
-                    });
                 });
             });
             
@@ -1368,4 +1317,135 @@ function formatDateForInput(dateString) {
         return `${parts[2]}-${parts[1]}-${parts[0]}`;
     }
     return dateString;
+}
+
+function setupTaskEditForm(menteeUsername, taskIndex, description, dueDate, menteeName) {
+    const taskForm = document.getElementById("task-form");
+    
+    // Remove all existing event listeners by cloning and replacing the form
+    const newTaskForm = taskForm.cloneNode(true);
+    taskForm.parentNode.replaceChild(newTaskForm, taskForm);
+    
+    // Set form values
+    document.getElementById("task-mentee").value = menteeUsername;
+    document.getElementById("task-description").value = description;
+    document.getElementById("task-due-date").value = dueDate;
+    document.getElementById("task-form-title").textContent = `Edit Task for ${menteeName}`;
+    
+    // Add new event listener
+    newTaskForm.addEventListener("submit", function(e) {
+        e.preventDefault();
+        
+        const menteeUsername = document.getElementById("task-mentee").value;
+        const description = document.getElementById("task-description").value;
+        const dueDateInput = document.getElementById("task-due-date");
+        
+        if (!validateTaskDate(dueDateInput.value)) {
+            showError("Task due date must be today or in the future");
+            return;
+        }
+        
+        const dueDate = formatDateForBackend(dueDateInput.value);
+        editTask(menteeUsername, taskIndex, description, dueDate, menteeName);
+    });
+}
+
+// Add this new function to handle meeting edit form setup
+function setupMeetingEditForm(menteeUsername, noteIndex, date, summary, menteeName) {
+    const meetingForm = document.getElementById("meeting-form");
+    
+    // Remove all existing event listeners by cloning and replacing the form
+    const newMeetingForm = meetingForm.cloneNode(true);
+    meetingForm.parentNode.replaceChild(newMeetingForm, meetingForm);
+    
+    // Set form values
+    document.getElementById("meeting-mentee").value = menteeUsername;
+    document.getElementById("meeting-date").value = date;
+    document.getElementById("meeting-summary").value = summary;
+    document.getElementById("meeting-form-title").textContent = `Edit Meeting Note for ${menteeName}`;
+    
+    // Add new event listener
+    newMeetingForm.addEventListener("submit", function(e) {
+        e.preventDefault();
+        
+        const menteeUsername = document.getElementById("meeting-mentee").value;
+        const dateInput = document.getElementById("meeting-date");
+        const summary = document.getElementById("meeting-summary").value;
+        
+        if (!validateMeetingDate(dateInput.value)) {
+            showError("Meeting date must be today or in the past");
+            return;
+        }
+        
+        const date = formatDateForBackend(dateInput.value);
+        editMeetingNote(menteeUsername, noteIndex, date, summary, menteeName);
+    });
+}
+
+function setupAddTaskForm(menteeUsername, menteeName) {
+    const taskForm = document.getElementById("task-form");
+    
+    // Remove all existing event listeners by cloning and replacing the form
+    const newTaskForm = taskForm.cloneNode(true);
+    taskForm.parentNode.replaceChild(newTaskForm, taskForm);
+    
+    // Reset and set up the form
+    document.getElementById("task-form").reset();
+    document.getElementById("task-mentee").value = menteeUsername;
+    document.getElementById("task-form-title").textContent = `Add Task for ${menteeName}`;
+    
+    // Set min date for task due date
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById("task-due-date").min = today;
+    
+    // Add new event listener
+    newTaskForm.addEventListener("submit", function(e) {
+        e.preventDefault();
+        
+        const menteeUsername = document.getElementById("task-mentee").value;
+        const description = document.getElementById("task-description").value;
+        const dueDateInput = document.getElementById("task-due-date");
+        
+        if (!validateTaskDate(dueDateInput.value)) {
+            showError("Task due date must be today or in the future");
+            return;
+        }
+        
+        const dueDate = formatDateForBackend(dueDateInput.value);
+        addTask(menteeUsername, description, dueDate);
+    });
+}
+
+function setupAddMeetingForm(menteeUsername, menteeName) {
+    const meetingForm = document.getElementById("meeting-form");
+    
+    // Remove all existing event listeners by cloning and replacing the form
+    const newMeetingForm = meetingForm.cloneNode(true);
+    meetingForm.parentNode.replaceChild(newMeetingForm, meetingForm);
+    
+    // Reset and set up the form
+    document.getElementById("meeting-form").reset();
+    document.getElementById("meeting-mentee").value = menteeUsername;
+    document.getElementById("meeting-form-title").textContent = `Add Meeting Note for ${menteeName}`;
+    
+    // Set max date for meeting date
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById("meeting-date").max = today;
+    
+    // Add new event listener
+    newMeetingForm.addEventListener("submit", function(e) {
+        e.preventDefault();
+        
+        const menteeUsername = document.getElementById("meeting-mentee").value;
+        const dateInput = document.getElementById("meeting-date");
+        const summary = document.getElementById("meeting-summary").value;
+        
+        if (!validateMeetingDate(dateInput.value)) {
+            showError("Meeting date must be today or in the past");
+            return;
+        }
+        
+        const date = formatDateForBackend(dateInput.value);
+        addMeetingNote(menteeUsername, date, summary);
+    });
 }

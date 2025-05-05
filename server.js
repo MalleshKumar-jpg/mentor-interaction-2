@@ -165,18 +165,6 @@ app.post('/api/delete_meeting', async (req, res) => {
     }
 });
 
-app.post('/api/edit_meeting', async (req, res) => {
-    try {
-        const { mentee, index, date, summary } = req.body;
-        // Delete old meeting
-        await executeBackend('delete_meeting', [mentee, index.toString()]);
-        // Add new meeting
-        const result = await executeBackend('add_meeting', [mentee, date, summary]);
-        res.json(result);
-    } catch (error) {
-        res.status(500).json({ success: false, message: 'Server error' });
-    }
-});
 
 app.post('/api/update_profile', async (req, res) => {
     try {
