@@ -1,8 +1,6 @@
-// Global variables
 let currentUser = null;
 let currentMenteeName = "";
 
-// DOM ready event
 document.addEventListener("DOMContentLoaded", function() {
     
     // Check if user is logged in
@@ -671,7 +669,6 @@ async function viewMenteeMeetings(menteeUsername, menteeName) {
             const meetingsList = document.getElementById("meetings-list");
             meetingsList.innerHTML = "";
 
-
             document.getElementById("meetings-heading").textContent = `${menteeName}'s Meeting Notes`;
             
             if (data.meetings.length === 0) {
@@ -679,21 +676,40 @@ async function viewMenteeMeetings(menteeUsername, menteeName) {
                 return;
             }
             
-            data.meetings.forEach((meeting, index) => {
+            // Create an array of meetings with their original indices
+            const meetingsWithIndices = data.meetings.map((meeting, index) => ({
+                ...meeting,
+                originalIndex: index
+            }));
+            
+            // Sort meetings by date (newest first)
+            const sortedMeetings = meetingsWithIndices.sort((a, b) => {
+                // Convert DD-MM-YYYY to Date objects for comparison
+                const datePartsA = a.date.split('-');
+                const datePartsB = b.date.split('-');
+                
+                // Create date objects in format YYYY-MM-DD
+                const dateA = new Date(`${datePartsA[2]}-${datePartsA[1]}-${datePartsA[0]}`);
+                const dateB = new Date(`${datePartsB[2]}-${datePartsB[1]}-${datePartsB[0]}`);
+                
+                // Sort newest first
+                return dateB - dateA;
+            });
+            
+            sortedMeetings.forEach(meeting => {
                 const meetingItem = document.createElement("div");
                 meetingItem.className = "list-item";
                 meetingItem.innerHTML = `
                     <h3>Meeting on ${meeting.date}</h3>
                     <p>${meeting.summary}</p>
                     <div class="button-group">
-                        <button class="edit-meeting" data-index="${index}" data-mentee="${menteeUsername}" data-name="${menteeName}">Edit</button>
-                        <button class="delete-meeting delete" data-index="${index}" data-mentee="${menteeUsername}" data-name="${menteeName}">Delete</button>
+                        <button class="edit-meeting" data-index="${meeting.originalIndex}" data-mentee="${menteeUsername}" data-name="${menteeName}">Edit</button>
+                        <button class="delete-meeting delete" data-index="${meeting.originalIndex}" data-mentee="${menteeUsername}" data-name="${menteeName}">Delete</button>
                     </div>
                 `;
                 
                 meetingsList.appendChild(meetingItem);
                 
-
                 meetingItem.querySelector(".delete-meeting").addEventListener("click", function() {
                     const index = this.getAttribute("data-index");
                     const mentee = this.getAttribute("data-mentee");
@@ -717,7 +733,6 @@ async function viewMenteeMeetings(menteeUsername, menteeName) {
                     document.getElementById("meeting-date").max = today;
                 });
             });
-            
             
             document.getElementById("mentees-tab").classList.remove("active");
             document.getElementById("meetings-tab").classList.add("active");
@@ -787,13 +802,33 @@ async function loadTasks() {
                 return;
             }
             
-            data.tasks.forEach(task => {
+            // Create an array of tasks with their original indices
+            const tasksWithIndices = data.tasks.map((task, index) => ({
+                ...task,
+                originalIndex: index
+            }));
+            
+            // Sort tasks by due date (newest first)
+            const sortedTasks = tasksWithIndices.sort((a, b) => {
+                // Convert DD-MM-YYYY to Date objects for comparison
+                const datePartsA = a.dueDate.split('-');
+                const datePartsB = b.dueDate.split('-');
+                
+                // Create date objects in format YYYY-MM-DD
+                const dateA = new Date(`${datePartsA[2]}-${datePartsA[1]}-${datePartsA[0]}`);
+                const dateB = new Date(`${datePartsB[2]}-${datePartsB[1]}-${datePartsB[0]}`);
+                
+                // Sort newest first
+                return dateB - dateA;
+            });
+            
+            sortedTasks.forEach(task => {
                 const taskItem = document.createElement("div");
                 taskItem.className = "list-item";
                 taskItem.innerHTML = `
                     <h3>${task.description}</h3>
                     <p><strong>Due Date:</strong> ${task.dueDate}</p>
-`;
+                `;
                 
                 tasksList.appendChild(taskItem);
             });
@@ -804,7 +839,6 @@ async function loadTasks() {
         showError("Server error. Please try again later.");
     }
 }
-
 
 async function loadMeetingNotes() {
     try {
@@ -820,7 +854,27 @@ async function loadMeetingNotes() {
                 return;
             }
             
-            data.meetings.forEach(meeting => {
+            // Create an array of meetings with their original indices
+            const meetingsWithIndices = data.meetings.map((meeting, index) => ({
+                ...meeting,
+                originalIndex: index
+            }));
+            
+            // Sort meetings by date (newest first)
+            const sortedMeetings = meetingsWithIndices.sort((a, b) => {
+                // Convert DD-MM-YYYY to Date objects for comparison
+                const datePartsA = a.date.split('-');
+                const datePartsB = b.date.split('-');
+                
+                // Create date objects in format YYYY-MM-DD
+                const dateA = new Date(`${datePartsA[2]}-${datePartsA[1]}-${datePartsA[0]}`);
+                const dateB = new Date(`${datePartsB[2]}-${datePartsB[1]}-${datePartsB[0]}`);
+                
+                // Sort newest first
+                return dateB - dateA;
+            });
+            
+            sortedMeetings.forEach(meeting => {
                 const meetingItem = document.createElement("div");
                 meetingItem.className = "list-item";
                 meetingItem.innerHTML = `
