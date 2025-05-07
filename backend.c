@@ -629,26 +629,6 @@ User** get_sorted_mentees(User* mentor, int* count) {
     return mentees;
 }
 
-void generate_sample_data() {
-    User* mentor1 = register_mentor("rajan.kumar", "Mentor@2025", "Dr. Rajan Kumar", "rajan.kumar@ssn.edu.in", "9845671230", "CSE");
-    User* mentor2 = register_mentor("priya.sharma", "Faculty@2025", "Dr. Priya Sharma", "priya.sharma@ssn.edu.in", "7812345690", "ECE");
-    
-    User* mentee1 = register_mentee("aditya.singh", "Student@2025", "Aditya Singh", "aditya.singh@ssn.edu.in", "9876543210", "CSE", 4, "2041012", "3122245001025", "Rajesh Singh", "rajesh.singh@gmail.com", "9812345670", mentor1);
-    User* mentee2 = register_mentee("kavya.patel", "Kavya@2025", "Kavya Patel", "kavya.patel@ssn.edu.in", "8765432109", "IT", 3, "2410391", "3122245001025", "Mahesh Patel", "mahesh.patel@gmail.com", "9756431280", mentor1);
-    User* mentee3 = register_mentee("vishnu.nair", "Vishnu@2025", "Vishnu Nair", "vishnu.nair@ssn.edu.in", "7654321098", "ECE", 1, "2024115", "3122245001025", "Suresh Nair", "suresh.nair@gmail.com", "9567842310", mentor2);
-    
-    add_task(mentee1, "Read 'Atomic Habits' by James Clear", "2025-05-15");
-    add_task(mentee1, "Practice meditation for 10 minutes daily", "2025-05-20");
-    add_task(mentee2, "Practice public speaking in front of a mirror for 15 minutes daily", "2025-05-10");
-    add_task(mentee3, "Join at least one technical club on campus", "2025-05-12");
-    
-    add_meeting_note(mentee1, "2025-04-01", "Discussed personal growth goals...");
-    add_meeting_note(mentee1, "2025-04-15", "Follow-up on personal development...");
-    add_meeting_note(mentee2, "2025-04-02", "First meeting with Kavya...");
-    add_meeting_note(mentee3, "2025-04-05", "As a first-year student, Vishnu is feeling...");
-    save_users_to_file();
-}
-
 void initialize_system() {
    load_users_from_file();
    
@@ -659,9 +639,10 @@ void initialize_system() {
            break;
        }
    }
-   
+
    if (!has_users) {
-       generate_sample_data();
+    FILE* file = fopen("users.dat", "wb");
+    fclose(file);
    }
 }
 

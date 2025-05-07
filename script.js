@@ -67,11 +67,17 @@ function setupMentorRegistrationPage() {
             
             const username = document.getElementById("username").value;
             const password = document.getElementById("password").value;
+            const confirmPassword = document.getElementById("confirm-password").value;
             const name = document.getElementById("name").value;
             const email = document.getElementById("email").value;
             const phone = document.getElementById("phone").value;
             const department = document.getElementById("department").value;
             
+            if (password !== confirmPassword) {
+                showError("Passwords do not match. Please try again.");
+                return;
+            }
+
             registerMentor(username, password, name, email, phone, department);
         });
     }
@@ -134,7 +140,13 @@ function setupMentorDashboard() {
             // Load tab data
             if (tabId === "mentees-tab") {
                 loadMentees();
-            }   
+            } else if (tabId === "tasks-tab") {
+                document.getElementById("tasks-list").innerHTML = "<p>Click on 'View Tasks' on a mentee card from home page to view tasks.</p>";
+                document.getElementById("tasks-heading").textContent = "Tasks";
+            } else if (tabId === "meetings-tab") {
+                document.getElementById("meetings-list").innerHTML = "<p>Click on 'View Meetings' on a mentee card from home page to view meeting notes.</p>";
+                document.getElementById("meetings-heading").textContent = "Meeting Notes";
+            }
         });
     });
     
@@ -626,9 +638,15 @@ async function viewMenteeTasks(menteeUsername, menteeName) {
         if (data.success) {
             const tasksList = document.getElementById("tasks-list");
             tasksList.innerHTML = "";
-
             document.getElementById("tasks-heading").textContent = `${menteeName}'s Tasks`;
             
+            document.getElementById("mentees-tab").classList.remove("active");
+            document.getElementById("tasks-tab").classList.add("active");
+            
+            document.querySelector(".tab-button[data-tab='mentees-tab']").classList.remove("active");
+            document.querySelector(".tab-button[data-tab='tasks-tab']").classList.add("active");
+            
+
             if (data.tasks.length === 0) {
                 tasksList.innerHTML = "<p>No tasks assigned yet.</p>";
                 return;
@@ -682,11 +700,6 @@ async function viewMenteeTasks(menteeUsername, menteeName) {
                 });
             });
             
-            document.getElementById("mentees-tab").classList.remove("active");
-            document.getElementById("tasks-tab").classList.add("active");
-            
-            document.querySelector(".tab-button[data-tab='mentees-tab']").classList.remove("active");
-            document.querySelector(".tab-button[data-tab='tasks-tab']").classList.add("active");
         } else {
             showError(data.message);
         }
@@ -706,6 +719,12 @@ async function viewMenteeMeetings(menteeUsername, menteeName) {
 
             document.getElementById("meetings-heading").textContent = `${menteeName}'s Meeting Notes`;
             
+            document.getElementById("mentees-tab").classList.remove("active");
+            document.getElementById("meetings-tab").classList.add("active");
+            
+            document.querySelector(".tab-button[data-tab='mentees-tab']").classList.remove("active");
+            document.querySelector(".tab-button[data-tab='meetings-tab']").classList.add("active");
+
             if (data.meetings.length === 0) {
                 meetingsList.innerHTML = "<p>No meeting notes yet.</p>";
                 return;
@@ -717,7 +736,7 @@ async function viewMenteeMeetings(menteeUsername, menteeName) {
                 originalIndex: index
             }));
             
-            // Sort meetings by date (newest first)
+            // Sort meetings by date (latest first)
             const sortedMeetings = meetingsWithIndices.sort((a, b) => {
                 return new Date(b.date) - new Date(a.date);
             });
@@ -760,11 +779,7 @@ async function viewMenteeMeetings(menteeUsername, menteeName) {
                 });
             });
             
-            document.getElementById("mentees-tab").classList.remove("active");
-            document.getElementById("meetings-tab").classList.add("active");
             
-            document.querySelector(".tab-button[data-tab='mentees-tab']").classList.remove("active");
-            document.querySelector(".tab-button[data-tab='meetings-tab']").classList.add("active");
         } else {
             showError(data.message);
         }
