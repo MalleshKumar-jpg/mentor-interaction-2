@@ -193,18 +193,4 @@ app.get('/', (req, res) => {
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
-    
-    const { exec } = require('child_process');
-    const url = `http://localhost:${port}`;
-    
-    switch (process.platform) {
-        case 'darwin':
-            exec(`open ${url}`);
-            break;
-        case 'win32':
-            exec(`start ${url}`);
-            break;
-        default:
-            exec(`xdg-open ${url}`);
-    }
 });

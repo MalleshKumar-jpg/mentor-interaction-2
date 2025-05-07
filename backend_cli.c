@@ -100,12 +100,10 @@ int main(int argc, char* argv[]) {
                 printf(",\"parentContact\":");
                 print_json_string(user->data.mentee_data.parent_contact);
                 
-                if (user->data.mentee_data.mentor) {
-                    printf(",\"mentorName\":");
-                    print_json_string(user->data.mentee_data.mentor->name);
-                } else {
-                    printf(",\"mentorName\":\"None\"");
-                }
+                printf(",\"mentorName\":");
+                print_json_string(user->data.mentee_data.mentor->name);
+                printf(",\"mentorUsername\":");
+                print_json_string(user->data.mentee_data.mentor->username);
             }
             printf("}}\n");
         } else {

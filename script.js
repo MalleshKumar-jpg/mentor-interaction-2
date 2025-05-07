@@ -291,6 +291,60 @@ function setupAddMeetingForm(menteeUsername, menteeName) {
     });
 }
 
+function setupTaskEditForm(menteeUsername, taskIndex, description, dueDate, menteeName) {
+    const taskForm = document.getElementById("task-form");
+    
+    const newTaskForm = taskForm.cloneNode(true);
+    taskForm.parentNode.replaceChild(newTaskForm, taskForm);
+    
+    document.getElementById("task-mentee").value = menteeUsername;
+    document.getElementById("task-description").value = description;
+    document.getElementById("task-due-date").value = dueDate;
+    document.getElementById("task-form-title").textContent = `Edit Task for ${menteeName}`;
+    
+    newTaskForm.addEventListener("submit", function(e) {
+        e.preventDefault();
+        
+        const menteeUsername = document.getElementById("task-mentee").value;
+        const description = document.getElementById("task-description").value;
+        const dueDate = document.getElementById("task-due-date").value;
+        
+        if (!validateTaskDate(dueDate)) {
+            showError("Task due date must be today or in the future");
+            return;
+        }
+        
+        editTask(menteeUsername, taskIndex, description, dueDate, menteeName);
+    });
+}
+
+function setupMeetingEditForm(menteeUsername, noteIndex, date, summary, menteeName) {
+    const meetingForm = document.getElementById("meeting-form");
+    
+    const newMeetingForm = meetingForm.cloneNode(true);
+    meetingForm.parentNode.replaceChild(newMeetingForm, meetingForm);
+    
+    document.getElementById("meeting-mentee").value = menteeUsername;
+    document.getElementById("meeting-date").value = date;
+    document.getElementById("meeting-summary").value = summary;
+    document.getElementById("meeting-form-title").textContent = `Edit Meeting Note for ${menteeName}`;
+    
+    newMeetingForm.addEventListener("submit", function(e) {
+        e.preventDefault();
+        
+        const menteeUsername = document.getElementById("meeting-mentee").value;
+        const date = document.getElementById("meeting-date").value;
+        const summary = document.getElementById("meeting-summary").value;
+        
+        if (!validateMeetingDate(date)) {
+            showError("Meeting date must be today or in the past");
+            return;
+        }
+        
+        editMeetingNote(menteeUsername, noteIndex, date, summary, menteeName);
+    });
+}
+
 async function login(username, password) {
     try {
         const response = await fetch("/api/login", {
@@ -377,7 +431,7 @@ async function registerMentor(username, password, name, email, phone, department
                 window.location.href = "index.html";
             }, 2000);
         } else {
-            showError(data.message || "Registration failed");
+            showError(data.message);
         }
     } catch (error) {
         showError("Server error. Please try again later.");
@@ -447,7 +501,7 @@ async function registerMentee(username, password, name, email, phone, department
                 window.location.href = "index.html";
             }, 5000);
         } else {
-            showError(data.message || "Registration failed");
+            showError(data.message);
         }
     } catch (error) {
         showError("Server error. Please try again later.");
@@ -461,7 +515,7 @@ async function loadMentors() {
         if (data.success) {
             return data.mentors;
         } else {
-            showError(data.message || "Failed to load mentors");
+            showError(data.message);
             return [];
         }
     } catch (error) {
@@ -558,7 +612,7 @@ async function loadMentees() {
                 });
             });
         } else {
-            showError(data.message || "Failed to load mentees");
+            showError(data.message);
         }
     } catch (error) {
         showError("Server error. Please try again later.");
@@ -595,7 +649,7 @@ async function viewMenteeTasks(menteeUsername, menteeName) {
                 const taskItem = document.createElement("div");
                 taskItem.className = "list-item";
                 taskItem.innerHTML = `
-                <h3>${task.description}</h3>
+                    <h3>${task.description}</h3>
                     <p><strong>Due Date:</strong> ${formatDateForDisplay(task.dueDate)}</p>
                     <div class="button-group">
                         <button class="edit-task" data-index="${task.originalIndex}" data-mentee="${menteeUsername}" data-name="${menteeName}">Edit</button>
@@ -620,7 +674,6 @@ async function viewMenteeTasks(menteeUsername, menteeName) {
                     document.getElementById("task-modal").style.display = "block";
                     document.getElementById("task-form").reset();
                 
-                    // Use the date directly
                     setupTaskEditForm(mentee, index, task.description, task.dueDate, name);
                     
                     // Set min date for task due date
@@ -635,7 +688,7 @@ async function viewMenteeTasks(menteeUsername, menteeName) {
             document.querySelector(".tab-button[data-tab='mentees-tab']").classList.remove("active");
             document.querySelector(".tab-button[data-tab='tasks-tab']").classList.add("active");
         } else {
-            showError(data.message || "Failed to load tasks");
+            showError(data.message);
         }
     } catch (error) {
         showError("Server error. Please try again later.");
@@ -713,7 +766,7 @@ async function viewMenteeMeetings(menteeUsername, menteeName) {
             document.querySelector(".tab-button[data-tab='mentees-tab']").classList.remove("active");
             document.querySelector(".tab-button[data-tab='meetings-tab']").classList.add("active");
         } else {
-            showError(data.message || "Failed to load meeting notes");
+            showError(data.message);
         }
     } catch (error) {
         showError("Server error. Please try again later.");
@@ -797,7 +850,7 @@ async function loadTasks() {
                 tasksList.appendChild(taskItem);
             });
         } else {
-            showError(data.message || "Failed to load tasks");
+            showError(data.message);
         }
     } catch (error) {
         showError("Server error. Please try again later.");
@@ -840,7 +893,7 @@ async function loadMeetingNotes() {
                 meetingsList.appendChild(meetingItem);
             });
         } else {
-            showError(data.message || "Failed to load meeting notes");
+            showError(data.message);
         }
     } catch (error) {
         showError("Server error. Please try again later.");
@@ -857,45 +910,23 @@ async function loadProfile() {
             const profileContainer = document.getElementById("profile-container");
             const profile = data.profile;
             
+            // Fetch mentor details directly using the username
+            const mentorProfileResponse = await fetch(`/api/profile?username=${encodeURIComponent(profile.mentorUsername)}`);
+            const mentorProfileData = await mentorProfileResponse.json();
             
-            let mentorContactHtml = '';
-            try {
-                const mentorResponse = await fetch("/api/mentors");
-                const mentorData = await mentorResponse.json();
-                
-                if (mentorData.success && mentorData.mentors && mentorData.mentors.length > 0) {
-                    const mentor = mentorData.mentors.find(m => m.name === profile.mentorName);
-                    
-                    if (mentor) {
-                        const mentorProfileResponse = await fetch(`/api/profile?username=${encodeURIComponent(mentor.username)}`);
-                        const mentorProfileData = await mentorProfileResponse.json();
-                        
-                        if (mentorProfileData.success) {
-                            const mentorProfile = mentorProfileData.profile;
-                            mentorContactHtml = `
-                                <div class="mentor-contact">
-                                    <p><strong>Email:</strong> ${mentorProfile.email}</p>
-                                    <p><strong>Phone:</strong> ${mentorProfile.phone}</p>
-                                    <p><strong>Department:</strong> ${mentorProfile.department}</p>
-                                </div>
-                            `;
-                        }
-                    }
-                }
-            } catch (error) {
-                console.error("Error fetching mentor details:", error);
-                mentorContactHtml = "<p>Could not load mentor contact details</p>";
-            }
-            
-            // Create mentor section with the fetched contact details
+            // Create mentor information section
+            const mentorProfile = mentorProfileData.profile;
             const mentorSection = document.createElement("div");
             mentorSection.className = "mentor-info-card";
             mentorSection.innerHTML = `
                 <h3>My Mentor</h3>
                 <p><strong>Name:</strong> ${profile.mentorName}</p>
-                <div id="mentor-contact-details">${mentorContactHtml}</div>
+                <div class="mentor-contact">
+                    <p><strong>Email:</strong> ${mentorProfile.email}</p>
+                    <p><strong>Phone:</strong> ${mentorProfile.phone}</p>
+                    <p><strong>Department:</strong> ${mentorProfile.department}</p>
+                </div>
             `;
-            
             
             const studentSection = document.createElement("div");
             studentSection.className = "student-profile-info";
@@ -911,23 +942,20 @@ async function loadProfile() {
                     <p><strong>Registration Number:</strong> ${profile.registrationNumber}</p>
                     <div class="parent-details">
                         <h4>Parent Information</h4>
-                        <p><strong>Parent Name:</strong> ${profile.parentName || "N/A"}</p>
-                        <p><strong>Parent Email:</strong> ${profile.parentEmail || "N/A"}</p>
+                        <p><strong>Parent Name:</strong> ${profile.parentName}</p>
+                        <p><strong>Parent Email:</strong> ${profile.parentEmail}</p>
                         <p><strong>Parent Contact:</strong> ${profile.parentContact}</p>
                     </div>
                 </div>
             `;
             
-            
             profileContainer.innerHTML = '';
             profileContainer.appendChild(mentorSection);
             profileContainer.appendChild(studentSection);
             
-            
-            
             document.getElementById("edit-profile-button").addEventListener("click", function() {
                 document.getElementById("profile-modal").style.display = "block";
-
+                
                 document.getElementById("edit-name").value = profile.name;
                 document.getElementById("edit-email").value = profile.email;
                 document.getElementById("edit-phone").value = profile.phone;
@@ -935,11 +963,10 @@ async function loadProfile() {
                 document.getElementById("edit-year").value = profile.year;
                 document.getElementById("edit-digital-id").value = profile.digitalId;
                 document.getElementById("edit-registration-number").value = profile.registrationNumber;
-                document.getElementById("edit-parent-name").value = profile.parentName || "";
-                document.getElementById("edit-parent-email").value = profile.parentEmail || "";
+                document.getElementById("edit-parent-name").value = profile.parentName;
+                document.getElementById("edit-parent-email").value = profile.parentEmail;
                 document.getElementById("edit-parent-contact").value = profile.parentContact;
                 
-
                 const profileForm = document.getElementById("profile-form");
                 profileForm.addEventListener("submit", function(e) {
                     e.preventDefault();
@@ -959,7 +986,7 @@ async function loadProfile() {
                 });
             });
         } else {
-            showError(data.message || "Failed to load profile");
+            showError(data.message);
         }
     } catch (error) {
         showError("Server error. Please try again later.");
@@ -1007,7 +1034,8 @@ async function updateProfile(name, email, phone, department, year, digitalId, re
             body: JSON.stringify({
                 username: currentUser.username,
                 name, email, phone, department,
-                year: parseInt(year), digitalId, registrationNumber,
+                year: parseInt(year),
+                digitalId, registrationNumber,
                 parentName, parentEmail, parentContact
             })
         });
@@ -1019,7 +1047,7 @@ async function updateProfile(name, email, phone, department, year, digitalId, re
             showSuccess("Profile updated successfully!");
             loadProfile();  // Reload the profile
         } else {
-            showError(data.message || "Failed to update profile");
+            showError(data.message);
         }
     } catch (error) {
         showError("Server error. Please try again later.");
@@ -1048,7 +1076,7 @@ async function addTask(menteeUsername, description, dueDate) {
             
             loadMentees();
         } else {
-            showError(data.message || "Failed to add task");
+            showError(data.message);
         }
     } catch (error) {
         showError("Server error. Please try again later.");
@@ -1077,7 +1105,7 @@ async function editTask(menteeUsername, taskIndex, description, dueDate, menteeN
             showSuccess("Task updated successfully!");
             viewMenteeTasks(menteeUsername, menteeName);
         } else {
-            showError(data.message || "Failed to update task");
+            showError(data.message);
         }
     } catch (error) {
         showError("Server error. Please try again later.");
@@ -1107,7 +1135,7 @@ async function deleteTask(menteeUsername, taskIndex, menteeName) {
             showSuccess("Task deleted successfully!");
             viewMenteeTasks(menteeUsername, menteeName);
         } else {
-            showError(data.message || "Failed to delete task");
+            showError(data.message);
         }
     } catch (error) {
         showError("Server error. Please try again later.");
@@ -1136,7 +1164,7 @@ async function addMeetingNote(menteeUsername, date, summary) {
             
             loadMentees();
         } else {
-            showError(data.message || "Failed to add meeting note");
+            showError(data.message);
         }
     } catch (error) {
         showError("Server error. Please try again later.");
@@ -1165,7 +1193,7 @@ async function editMeetingNote(menteeUsername, noteIndex, date, summary, menteeN
             showSuccess("Meeting note updated successfully!");
             viewMenteeMeetings(menteeUsername, menteeName);
         } else {
-            showError(data.message || "Failed to update meeting note");
+            showError(data.message);
         }
     } catch (error) {
         showError("Server error. Please try again later.");
@@ -1195,7 +1223,7 @@ async function deleteMeetingNote(menteeUsername, noteIndex, menteeName) {
             showSuccess("Meeting note deleted successfully!");
             viewMenteeMeetings(menteeUsername, menteeName);
         } else {
-            showError(data.message || "Failed to delete meeting note");
+            showError(data.message);
         }
     } catch (error) {
         showError("Server error. Please try again later.");
@@ -1278,68 +1306,8 @@ function validateMeetingDate(dateString) {
     return selectedDate <= today;
 }
 
-function setupTaskEditForm(menteeUsername, taskIndex, description, dueDate, menteeName) {
-    const taskForm = document.getElementById("task-form");
-    
-    // Remove all existing event listeners by cloning and replacing the form
-    const newTaskForm = taskForm.cloneNode(true);
-    taskForm.parentNode.replaceChild(newTaskForm, taskForm);
-    
-    // Set form values
-    document.getElementById("task-mentee").value = menteeUsername;
-    document.getElementById("task-description").value = description;
-    document.getElementById("task-due-date").value = dueDate;
-    document.getElementById("task-form-title").textContent = `Edit Task for ${menteeName}`;
-    
-    // Add new event listener
-    newTaskForm.addEventListener("submit", function(e) {
-        e.preventDefault();
-        
-        const menteeUsername = document.getElementById("task-mentee").value;
-        const description = document.getElementById("task-description").value;
-        const dueDate = document.getElementById("task-due-date").value;
-        
-        if (!validateTaskDate(dueDate)) {
-            showError("Task due date must be today or in the future");
-            return;
-        }
-        
-        editTask(menteeUsername, taskIndex, description, dueDate, menteeName);
-    });
-}
-
-function setupMeetingEditForm(menteeUsername, noteIndex, date, summary, menteeName) {
-    const meetingForm = document.getElementById("meeting-form");
-    
-    // Remove all existing event listeners by cloning and replacing the form
-    const newMeetingForm = meetingForm.cloneNode(true);
-    meetingForm.parentNode.replaceChild(newMeetingForm, meetingForm);
-    
-    // Set form values
-    document.getElementById("meeting-mentee").value = menteeUsername;
-    document.getElementById("meeting-date").value = date;
-    document.getElementById("meeting-summary").value = summary;
-    document.getElementById("meeting-form-title").textContent = `Edit Meeting Note for ${menteeName}`;
-    
-    // Add new event listener
-    newMeetingForm.addEventListener("submit", function(e) {
-        e.preventDefault();
-        
-        const menteeUsername = document.getElementById("meeting-mentee").value;
-        const date = document.getElementById("meeting-date").value;
-        const summary = document.getElementById("meeting-summary").value;
-        
-        if (!validateMeetingDate(date)) {
-            showError("Meeting date must be today or in the past");
-            return;
-        }
-        
-        editMeetingNote(menteeUsername, noteIndex, date, summary, menteeName);
-    });
-}
 
 function formatDateForDisplay(dateString) {
-    // Convert from YYYY-MM-DD to DD-MM-YYYY for display only
     const parts = dateString.split('-');
     if (parts.length === 3) {
         return `${parts[2]}-${parts[1]}-${parts[0]}`;
