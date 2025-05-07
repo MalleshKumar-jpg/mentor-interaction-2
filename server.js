@@ -97,7 +97,7 @@ app.get('/api/tasks', async (req, res) => {
 
 app.post('/api/add_task', async (req, res) => {
     try {
-        const { mentee, description, dueDate } = req.body;
+        const { mentee, description, dueDate } = req.body;  
         const result = await executeBackend('add_task', [mentee, description, dueDate]);
         res.json(result);
     } catch (error) {

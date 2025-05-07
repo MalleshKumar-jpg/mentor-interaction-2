@@ -5,6 +5,7 @@ User* current_user = NULL;
 User* mentor_list[MAX_MENTORS] = {NULL};
 int mentor_count = 0;
 
+
 //structure for loading mentors properly for load_users
 typedef struct {
     char mentee_username[MAX_USERNAME_LENGTH];
@@ -99,6 +100,7 @@ MenteeBSTNode* remove_bst_node(MenteeBSTNode* root, User* mentee, int meeting_co
     
     return root;
 }
+
 
 //returns the user structure with given username
 User* find_user(char* username) {

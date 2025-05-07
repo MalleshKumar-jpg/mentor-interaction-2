@@ -146,7 +146,7 @@ function setupMentorDashboard() {
             } else if (tabId === "meetings-tab") {
                 document.getElementById("meetings-list").innerHTML = "<p>Click on 'View Meetings' on a mentee card from home page to view meeting notes.</p>";
                 document.getElementById("meetings-heading").textContent = "Meeting Notes";
-            }
+            }   
         });
     });
     
@@ -927,21 +927,21 @@ async function loadProfile() {
             
             // Fetch mentor details directly using the username
             const mentorProfileResponse = await fetch(`/api/profile?username=${encodeURIComponent(profile.mentorUsername)}`);
-            const mentorProfileData = await mentorProfileResponse.json();
-            
+                        const mentorProfileData = await mentorProfileResponse.json();
+                        
             // Create mentor information section
-            const mentorProfile = mentorProfileData.profile;
+                            const mentorProfile = mentorProfileData.profile;
             const mentorSection = document.createElement("div");
             mentorSection.className = "mentor-info-card";
             mentorSection.innerHTML = `
                 <h3>My Mentor</h3>
                 <p><strong>Name:</strong> ${profile.mentorName}</p>
-                <div class="mentor-contact">
-                    <p><strong>Email:</strong> ${mentorProfile.email}</p>
-                    <p><strong>Phone:</strong> ${mentorProfile.phone}</p>
-                    <p><strong>Department:</strong> ${mentorProfile.department}</p>
-                </div>
-            `;
+                                <div class="mentor-contact">
+                                    <p><strong>Email:</strong> ${mentorProfile.email}</p>
+                                    <p><strong>Phone:</strong> ${mentorProfile.phone}</p>
+                                    <p><strong>Department:</strong> ${mentorProfile.department}</p>
+                                </div>
+                            `;
             
             const studentSection = document.createElement("div");
             studentSection.className = "student-profile-info";
@@ -970,7 +970,7 @@ async function loadProfile() {
             
             document.getElementById("edit-profile-button").addEventListener("click", function() {
                 document.getElementById("profile-modal").style.display = "block";
-                
+
                 document.getElementById("edit-name").value = profile.name;
                 document.getElementById("edit-email").value = profile.email;
                 document.getElementById("edit-phone").value = profile.phone;

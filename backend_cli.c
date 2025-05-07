@@ -16,7 +16,7 @@ void print_json_string(const char* str) {
     printf("\"");
 }
 
-int main(int argc, char* argv[]) {
+int main(int argc, char* args[]) {
     initialize_system();
     
     if (argc < 2) {
@@ -24,10 +24,10 @@ int main(int argc, char* argv[]) {
         return 1;
     }
     
-    char* command = argv[1];
+    char* command = args[1];
     
     if (strcmp(command, "login") == 0 && argc == 4) {
-        User* user = api_login(argv[2], argv[3]);
+        User* user = api_login(args[2], args[3]);
         if (user) {
             printf("{\"success\":true,\"username\":");
             print_json_string(user->username);
@@ -39,7 +39,7 @@ int main(int argc, char* argv[]) {
         }
     }
     else if (strcmp(command, "register_mentor") == 0 && argc == 8) {
-        User* mentor = api_register_mentor(argv[2], argv[3], argv[4], argv[5], argv[6], argv[7]);
+        User* mentor = api_register_mentor(args[2], args[3], args[4], args[5], args[6], args[7]);
         if (mentor) {
             printf("{\"success\":true,\"username\":");
             print_json_string(mentor->username);
@@ -49,8 +49,8 @@ int main(int argc, char* argv[]) {
         }
     }
     else if (strcmp(command, "register_mentee") == 0 && argc == 15) {
-        int year = atoi(argv[8]);
-        User* mentee = api_register_mentee(argv[2], argv[3], argv[4], argv[5], argv[6], argv[7], year, argv[9], argv[10], argv[11], argv[12], argv[13], argv[14]);
+        int year = atoi(args[8]);
+        User* mentee = api_register_mentee(args[2], args[3], args[4], args[5], args[6], args[7], year, args[9], args[10], args[11], args[12], args[13], args[14]);
         if (mentee) {
             printf("{\"success\":true,\"username\":");
             print_json_string(mentee->username);
@@ -75,7 +75,7 @@ int main(int argc, char* argv[]) {
         printf("]}\n");
     }
     else if (strcmp(command, "get_profile") == 0 && argc == 3) {
-        User* user = find_user(argv[2]);
+        User* user = find_user(args[2]);
         if (user) {
             printf("{\"success\":true,\"profile\":{");
             printf("\"name\":");
@@ -112,7 +112,7 @@ int main(int argc, char* argv[]) {
     }
     else if (strcmp(command, "get_tasks") == 0 && argc == 3) {
         int count = 0;
-        Task** tasks = api_get_tasks(argv[2], &count);
+        Task** tasks = api_get_tasks(args[2], &count);
         
         printf("{\"success\":true,\"tasks\":[");
         if (tasks) {
@@ -129,7 +129,7 @@ int main(int argc, char* argv[]) {
         printf("]}\n");
     }
     else if (strcmp(command, "add_task") == 0 && argc == 5) {
-        bool success = api_add_task(argv[2], argv[3], argv[4]);
+        bool success = api_add_task(args[2], args[3], args[4]);
         if (success) {
             printf("{\"success\":true}\n");
         } else {
@@ -137,8 +137,8 @@ int main(int argc, char* argv[]) {
         }
     }
     else if (strcmp(command, "edit_task") == 0 && argc == 6) {
-        int index = atoi(argv[3]);
-        bool success = api_edit_task(argv[2], index, argv[4], argv[5]);
+        int index = atoi(args[3]);
+        bool success = api_edit_task(args[2], index, args[4], args[5]);
         if (success) {
             printf("{\"success\":true}\n");
         } else {
@@ -146,8 +146,8 @@ int main(int argc, char* argv[]) {
         }
     }
     else if (strcmp(command, "delete_task") == 0 && argc == 4) {
-        int index = atoi(argv[3]);
-        bool success = api_delete_task(argv[2], index);
+        int index = atoi(args[3]);
+        bool success = api_delete_task(args[2], index);
         if (success) {
             printf("{\"success\":true}\n");
         } else {
@@ -156,7 +156,7 @@ int main(int argc, char* argv[]) {
     }
     else if (strcmp(command, "get_meetings") == 0 && argc == 3) {
         int count = 0;
-        Meeting_note** notes = api_get_meeting_notes(argv[2], &count);
+        Meeting_note** notes = api_get_meeting_notes(args[2], &count);
         
         printf("{\"success\":true,\"meetings\":[");
         if (notes) {
@@ -173,7 +173,7 @@ int main(int argc, char* argv[]) {
         printf("]}\n");
     }
     else if (strcmp(command, "add_meeting") == 0 && argc == 5) {
-        bool success = api_add_meeting_note(argv[2], argv[3], argv[4]);
+        bool success = api_add_meeting_note(args[2], args[3], args[4]);
         if (success) {
             printf("{\"success\":true}\n");
         } else {
@@ -181,8 +181,8 @@ int main(int argc, char* argv[]) {
         }
     }
     else if (strcmp(command, "edit_meeting") == 0 && argc == 6) {
-        int index = atoi(argv[3]);
-        bool success = api_edit_meeting_note(argv[2], index, argv[4], argv[5]);
+        int index = atoi(args[3]);
+        bool success = api_edit_meeting_note(args[2], index, args[4], args[5]);
         if (success) {
             printf("{\"success\":true}\n");
         } else {
@@ -190,8 +190,8 @@ int main(int argc, char* argv[]) {
         }
     }
     else if (strcmp(command, "delete_meeting") == 0 && argc == 4) {
-        int index = atoi(argv[3]);
-        bool success = api_delete_meeting_note(argv[2], index);
+        int index = atoi(args[3]);
+        bool success = api_delete_meeting_note(args[2], index);
         if (success) {
             printf("{\"success\":true}\n");
         } else {
@@ -199,8 +199,8 @@ int main(int argc, char* argv[]) {
         }
     }
     else if (strcmp(command, "update_profile") == 0 && argc == 13) {
-        int year = atoi(argv[7]);
-        bool success = api_update_mentee_info(argv[2], argv[3], argv[4], argv[5], argv[6], year, argv[8], argv[9], argv[10], argv[11], argv[12]);
+        int year = atoi(args[7]);
+        bool success = api_update_mentee_info(args[2], args[3], args[4], args[5], args[6], year, args[8], args[9], args[10], args[11], args[12]);
         if (success) {
             printf("{\"success\":true}\n");
         } else {
@@ -209,7 +209,7 @@ int main(int argc, char* argv[]) {
     }
     else if (strcmp(command, "get_mentee_details") == 0 && argc == 3) {
         int count = 0;
-        User** mentees = api_get_mentees(argv[2], &count);
+        User** mentees = api_get_mentees(args[2], &count);
         
         printf("{\"success\":true,\"mentees\":[");
         if (mentees) {
