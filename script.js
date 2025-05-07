@@ -247,14 +247,13 @@ function setupAddTaskForm(menteeUsername, menteeName) {
         
         const menteeUsername = document.getElementById("task-mentee").value;
         const description = document.getElementById("task-description").value;
-        const dueDateInput = document.getElementById("task-due-date");
+        const dueDate = document.getElementById("task-due-date").value;
         
-        if (!validateTaskDate(dueDateInput.value)) {
+        if (!validateTaskDate(dueDate)) {
             showError("Task due date must be today or in the future");
             return;
         }
         
-        const dueDate = formatDateForBackend(dueDateInput.value);
         addTask(menteeUsername, description, dueDate);
     });
 }
@@ -280,15 +279,14 @@ function setupAddMeetingForm(menteeUsername, menteeName) {
         e.preventDefault();
         
         const menteeUsername = document.getElementById("meeting-mentee").value;
-        const dateInput = document.getElementById("meeting-date");
+        const date = document.getElementById("meeting-date").value;
         const summary = document.getElementById("meeting-summary").value;
         
-        if (!validateMeetingDate(dateInput.value)) {
+        if (!validateMeetingDate(date)) {
             showError("Meeting date must be today or in the past");
             return;
         }
         
-        const date = formatDateForBackend(dateInput.value);
         addMeetingNote(menteeUsername, date, summary);
     });
 }
@@ -494,23 +492,25 @@ async function loadMentees() {
                         <h3>${mentee.name}</h3>
                         <p><strong>Year:</strong> ${mentee.year} | <strong>Department:</strong> ${mentee.department}</p>
                     </div>
+                    <br>
                     <div class="mentee-details">
                         <div class="contact-info">
                             <h4><u><em>Contact Information</em></u></h4>
                             <p><strong>Email:</strong> ${mentee.email}</p>
                             <p><strong>Phone:</strong> ${mentee.phone}</p>
                         </div>
+                        <br>
                         <div class="academic-info">
                             <h4><u><em>Academic Details</em></u></h4>
                             <p><strong>Digital ID:</strong> ${mentee.digitalId}</p>
                             <p><strong>Registration Number:</strong> ${mentee.registrationNumber}</p>
-                        </div>
+                        </div><br>
                         <div class="parent-info">
                             <h4><u><em>Parent Information</em></u></h4>
                             <p><strong>Parent Name:</strong> ${mentee.parentName}</p>
                             <p><strong>Parent Email:</strong> ${mentee.parentEmail}</p>
                             <p><strong>Parent Contact:</strong> ${mentee.parentContact}</p>
-                        </div>
+                        </div><br>
                         <div class="mentorship-info">
                             <h4><u><em>Mentorship Details</em></u></h4>
                             <p><strong>Meetings:</strong> ${mentee.meetingCount} | <strong>Tasks:</strong> ${mentee.taskCount}</p>
@@ -586,26 +586,17 @@ async function viewMenteeTasks(menteeUsername, menteeName) {
                 originalIndex: index
             }));
             
-            // Sort tasks by due date (newest first)
+            // Sort tasks by due date (ascending order - earliest first)
             const sortedTasks = tasksWithIndices.sort((a, b) => {
-                // Convert DD-MM-YYYY to Date objects for comparison
-                const datePartsA = a.dueDate.split('-');
-                const datePartsB = b.dueDate.split('-');
-                
-                // Create date objects in format YYYY-MM-DD
-                const dateA = new Date(`${datePartsA[2]}-${datePartsA[1]}-${datePartsA[0]}`);
-                const dateB = new Date(`${datePartsB[2]}-${datePartsB[1]}-${datePartsB[0]}`);
-                
-                // Sort newest first (reverse chronological)
-                return dateA - dateB;
+                return new Date(a.dueDate) - new Date(b.dueDate);
             });
             
             sortedTasks.forEach(task => {
                 const taskItem = document.createElement("div");
                 taskItem.className = "list-item";
                 taskItem.innerHTML = `
-                    <h3>${task.description}</h3>
-                    <p><strong>Due Date:</strong> ${task.dueDate}</p>
+                <h3>${task.description}</h3>
+                    <p><strong>Due Date:</strong> ${formatDateForDisplay(task.dueDate)}</p>
                     <div class="button-group">
                         <button class="edit-task" data-index="${task.originalIndex}" data-mentee="${menteeUsername}" data-name="${menteeName}">Edit</button>
                         <button class="delete-task delete" data-index="${task.originalIndex}" data-mentee="${menteeUsername}" data-name="${menteeName}">Delete</button>
@@ -629,8 +620,8 @@ async function viewMenteeTasks(menteeUsername, menteeName) {
                     document.getElementById("task-modal").style.display = "block";
                     document.getElementById("task-form").reset();
                 
-                    const formattedDate = formatDateForInput(task.dueDate);
-                    setupTaskEditForm(mentee, index, task.description, formattedDate, name);
+                    // Use the date directly
+                    setupTaskEditForm(mentee, index, task.description, task.dueDate, name);
                     
                     // Set min date for task due date
                     const today = new Date().toISOString().split('T')[0];
@@ -650,6 +641,7 @@ async function viewMenteeTasks(menteeUsername, menteeName) {
         showError("Server error. Please try again later.");
     }
 }
+
 async function viewMenteeMeetings(menteeUsername, menteeName) {
     try {
         const response = await fetch(`/api/meetings?mentee=${encodeURIComponent(menteeUsername)}`);
@@ -674,23 +666,14 @@ async function viewMenteeMeetings(menteeUsername, menteeName) {
             
             // Sort meetings by date (newest first)
             const sortedMeetings = meetingsWithIndices.sort((a, b) => {
-                // Convert DD-MM-YYYY to Date objects for comparison
-                const datePartsA = a.date.split('-');
-                const datePartsB = b.date.split('-');
-                
-                // Create date objects in format YYYY-MM-DD
-                const dateA = new Date(`${datePartsA[2]}-${datePartsA[1]}-${datePartsA[0]}`);
-                const dateB = new Date(`${datePartsB[2]}-${datePartsB[1]}-${datePartsB[0]}`);
-                
-                // Sort newest first
-                return dateB - dateA;
+                return new Date(b.date) - new Date(a.date);
             });
             
             sortedMeetings.forEach(meeting => {
                 const meetingItem = document.createElement("div");
                 meetingItem.className = "list-item";
                 meetingItem.innerHTML = `
-                    <h3>Meeting on ${meeting.date}</h3>
+                    <h3>Meeting on ${formatDateForDisplay(meeting.date)}</h3>
                     <p>${meeting.summary}</p>
                     <div class="button-group">
                         <button class="edit-meeting" data-index="${meeting.originalIndex}" data-mentee="${menteeUsername}" data-name="${menteeName}">Edit</button>
@@ -715,8 +698,8 @@ async function viewMenteeMeetings(menteeUsername, menteeName) {
                     document.getElementById("meeting-modal").style.display = "block";
                     document.getElementById("meeting-form").reset();
                     
-                    const formattedDate = formatDateForInput(meeting.date);
-                    setupMeetingEditForm(mentee, index, formattedDate, meeting.summary, name);
+                    // Use the date directly
+                    setupMeetingEditForm(mentee, index, meeting.date, meeting.summary, name);
                     
                     // Set max date for meeting date
                     const today = new Date().toISOString().split('T')[0];
@@ -798,18 +781,9 @@ async function loadTasks() {
                 originalIndex: index
             }));
             
-            // Sort tasks by due date (newest first)
+            // Sort tasks by due date (earliest first)
             const sortedTasks = tasksWithIndices.sort((a, b) => {
-                // Convert DD-MM-YYYY to Date objects for comparison
-                const datePartsA = a.dueDate.split('-');
-                const datePartsB = b.dueDate.split('-');
-                
-                // Create date objects in format YYYY-MM-DD
-                const dateA = new Date(`${datePartsA[2]}-${datePartsA[1]}-${datePartsA[0]}`);
-                const dateB = new Date(`${datePartsB[2]}-${datePartsB[1]}-${datePartsB[0]}`);
-                
-                // Sort newest first
-                return dateB - dateA;
+                return new Date(a.dueDate) - new Date(b.dueDate);
             });
             
             sortedTasks.forEach(task => {
@@ -817,7 +791,7 @@ async function loadTasks() {
                 taskItem.className = "list-item";
                 taskItem.innerHTML = `
                     <h3>${task.description}</h3>
-                    <p><strong>Due Date:</strong> ${task.dueDate}</p>
+                    <p><strong>Due Date:</strong> ${formatDateForDisplay(task.dueDate)}</p>
                 `;
                 
                 tasksList.appendChild(taskItem);
@@ -852,23 +826,14 @@ async function loadMeetingNotes() {
             
             // Sort meetings by date (newest first)
             const sortedMeetings = meetingsWithIndices.sort((a, b) => {
-                // Convert DD-MM-YYYY to Date objects for comparison
-                const datePartsA = a.date.split('-');
-                const datePartsB = b.date.split('-');
-                
-                // Create date objects in format YYYY-MM-DD
-                const dateA = new Date(`${datePartsA[2]}-${datePartsA[1]}-${datePartsA[0]}`);
-                const dateB = new Date(`${datePartsB[2]}-${datePartsB[1]}-${datePartsB[0]}`);
-                
-                // Sort newest first
-                return dateB - dateA;
+                return new Date(b.date) - new Date(a.date);
             });
             
             sortedMeetings.forEach(meeting => {
                 const meetingItem = document.createElement("div");
                 meetingItem.className = "list-item";
                 meetingItem.innerHTML = `
-                    <h3>Meeting on ${meeting.date}</h3>
+                    <h3>Meeting on ${formatDateForDisplay(meeting.date)}</h3>
                     <p>${meeting.summary}</p>
                 `;
                 
@@ -1063,11 +1028,6 @@ async function updateProfile(name, email, phone, department, year, digitalId, re
 
 async function addTask(menteeUsername, description, dueDate) {
     try {
-        if (!validateBackendDateFormat(dueDate)) {
-            showError("Invalid date format. Use DD-MM-YYYY");
-            return;
-        }
-        
         const response = await fetch("/api/add_task", {
             method: "POST",
             headers: {
@@ -1097,11 +1057,6 @@ async function addTask(menteeUsername, description, dueDate) {
 
 async function editTask(menteeUsername, taskIndex, description, dueDate, menteeName) {
     try {
-        if (!validateBackendDateFormat(dueDate)) {
-            showError("Invalid date format. Use DD-MM-YYYY");
-            return;
-        }
-        
         const response = await fetch("/api/edit_task", {
             method: "POST",
             headers: {
@@ -1161,11 +1116,6 @@ async function deleteTask(menteeUsername, taskIndex, menteeName) {
 
 async function addMeetingNote(menteeUsername, date, summary) {
     try {
-        if (!validateBackendDateFormat(date)) {
-            showError("Invalid date format. Use DD-MM-YYYY");
-            return;
-        }
-        
         const response = await fetch("/api/add_meeting", {
             method: "POST",
             headers: {
@@ -1195,11 +1145,6 @@ async function addMeetingNote(menteeUsername, date, summary) {
 
 async function editMeetingNote(menteeUsername, noteIndex, date, summary, menteeName) {
     try {
-        if (!validateBackendDateFormat(date)) {
-            showError("Invalid date format. Use DD-MM-YYYY");
-            return;
-        }
-        
         const response = await fetch("/api/edit_meeting", {
             method: "POST",
             headers: {
@@ -1333,30 +1278,6 @@ function validateMeetingDate(dateString) {
     return selectedDate <= today;
 }
 
-//validates format to check if it is the same format as backend
-function validateBackendDateFormat(dateString) {
-    const dateRegex = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
-    return dateRegex.test(dateString);
-}
-
-// yyyy-mm-dd to dd-mm-yyyy for backend
-function formatDateForBackend(dateString) {
-    const parts = dateString.split('-');
-    if (parts.length === 3) {
-        return `${parts[2]}-${parts[1]}-${parts[0]}`;
-    }
-    return dateString;
-}
-
-//dd-mm-yyyy to yyyy-mm-dd for HTML date input
-function formatDateForInput(dateString) {
-    const parts = dateString.split('-');
-    if (parts.length === 3) {
-        return `${parts[2]}-${parts[1]}-${parts[0]}`;
-    }
-    return dateString;
-}
-
 function setupTaskEditForm(menteeUsername, taskIndex, description, dueDate, menteeName) {
     const taskForm = document.getElementById("task-form");
     
@@ -1376,19 +1297,17 @@ function setupTaskEditForm(menteeUsername, taskIndex, description, dueDate, ment
         
         const menteeUsername = document.getElementById("task-mentee").value;
         const description = document.getElementById("task-description").value;
-        const dueDateInput = document.getElementById("task-due-date");
+        const dueDate = document.getElementById("task-due-date").value;
         
-        if (!validateTaskDate(dueDateInput.value)) {
+        if (!validateTaskDate(dueDate)) {
             showError("Task due date must be today or in the future");
             return;
         }
         
-        const dueDate = formatDateForBackend(dueDateInput.value);
         editTask(menteeUsername, taskIndex, description, dueDate, menteeName);
     });
 }
 
-// Add this new function to handle meeting edit form setup
 function setupMeetingEditForm(menteeUsername, noteIndex, date, summary, menteeName) {
     const meetingForm = document.getElementById("meeting-form");
     
@@ -1407,16 +1326,23 @@ function setupMeetingEditForm(menteeUsername, noteIndex, date, summary, menteeNa
         e.preventDefault();
         
         const menteeUsername = document.getElementById("meeting-mentee").value;
-        const dateInput = document.getElementById("meeting-date");
+        const date = document.getElementById("meeting-date").value;
         const summary = document.getElementById("meeting-summary").value;
         
-        if (!validateMeetingDate(dateInput.value)) {
+        if (!validateMeetingDate(date)) {
             showError("Meeting date must be today or in the past");
             return;
         }
         
-        const date = formatDateForBackend(dateInput.value);
         editMeetingNote(menteeUsername, noteIndex, date, summary, menteeName);
     });
 }
 
+function formatDateForDisplay(dateString) {
+    // Convert from YYYY-MM-DD to DD-MM-YYYY for display only
+    const parts = dateString.split('-');
+    if (parts.length === 3) {
+        return `${parts[2]}-${parts[1]}-${parts[0]}`;
+    }
+    return dateString;
+}

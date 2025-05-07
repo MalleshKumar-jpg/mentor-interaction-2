@@ -637,16 +637,15 @@ void generate_sample_data() {
     User* mentee2 = register_mentee("kavya.patel", "Kavya@2025", "Kavya Patel", "kavya.patel@ssn.edu.in", "8765432109", "IT", 3, "2410391", "3122245001025", "Mahesh Patel", "mahesh.patel@gmail.com", "9756431280", mentor1);
     User* mentee3 = register_mentee("vishnu.nair", "Vishnu@2025", "Vishnu Nair", "vishnu.nair@ssn.edu.in", "7654321098", "ECE", 1, "2024115", "3122245001025", "Suresh Nair", "suresh.nair@gmail.com", "9567842310", mentor2);
     
-    add_task(mentee1, "Read 'Atomic Habits' by James Clear", "15-05-2025");
-    add_task(mentee1, "Practice meditation for 10 minutes daily", "20-05-2025");
-    add_task(mentee2, "Practice public speaking in front of a mirror for 15 minutes daily", "10-05-2025");
-    add_task(mentee3, "Join at least one technical club on campus", "12-05-2025");
+    add_task(mentee1, "Read 'Atomic Habits' by James Clear", "2025-05-15");
+    add_task(mentee1, "Practice meditation for 10 minutes daily", "2025-05-20");
+    add_task(mentee2, "Practice public speaking in front of a mirror for 15 minutes daily", "2025-05-10");
+    add_task(mentee3, "Join at least one technical club on campus", "2025-05-12");
     
-    add_meeting_note(mentee1, "01-04-2025", "Discussed personal growth goals. Aditya wants to improve time management and reading habits. Recommended starting with 'Atomic Habits' and using the Pomodoro technique for study sessions.");
-    add_meeting_note(mentee1, "15-04-2025", "Follow-up on personal development. Aditya has started meditation and reports better focus. Still struggling with consistent reading habit.");
-    add_meeting_note(mentee2, "02-04-2025", "First meeting with Kavya. She expressed anxiety about presentations. Suggested daily practice in front of mirror and joining the college debate club to build confidence.");
-    add_meeting_note(mentee3, "05-04-2025", "As a first-year student, Vishnu is feeling overwhelmed. Suggested joining a technical club to make friends with similar interests and build support network.");
-    
+    add_meeting_note(mentee1, "2025-04-01", "Discussed personal growth goals...");
+    add_meeting_note(mentee1, "2025-04-15", "Follow-up on personal development...");
+    add_meeting_note(mentee2, "2025-04-02", "First meeting with Kavya...");
+    add_meeting_note(mentee3, "2025-04-05", "As a first-year student, Vishnu is feeling...");
     save_users_to_file();
 }
 
