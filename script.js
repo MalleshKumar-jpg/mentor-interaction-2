@@ -3,12 +3,12 @@ let currentMenteeName = "";
 
 document.addEventListener("DOMContentLoaded", function() {
     
-    // Check if user is logged in
+    // Check if a user is already logged in
     const userString = localStorage.getItem("currentUser");
     if (userString) {
         currentUser = JSON.parse(userString);
         
-        // Get current page
+        //get current page
         const currentPage = window.location.pathname.split("/").pop();
         
         // Only redirect if we're not already on the correct dashboard
@@ -46,7 +46,6 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 });
 
-// Login page setup
 function setupLoginPage() {
     const loginForm = document.getElementById("login-form");
     if (loginForm) {
@@ -60,8 +59,6 @@ function setupLoginPage() {
     }
 }
 
-
-// Mentor registration page setup
 function setupMentorRegistrationPage() {
     const registerForm = document.getElementById("register-mentor-form");
     if (registerForm) {
@@ -80,11 +77,10 @@ function setupMentorRegistrationPage() {
     }
 }
 
-// Mentee registration page setup
 function setupMenteeRegistrationPage() {
     const registerForm = document.getElementById("register-mentee-form");
     if (registerForm) {
-        // Load mentors for dropdown
+        //displaying mentor options in dropdown by loading mentor
         loadMentors().then(mentors => {
             const mentorSelect = document.getElementById("mentor");
             mentors.forEach(mentor => {
@@ -138,14 +134,13 @@ function setupMentorDashboard() {
             // Load tab data
             if (tabId === "mentees-tab") {
                 loadMentees();
-            }
+            }   
         });
     });
     
 
     tabButtons[0].click();
     
-
     setupModals();
 }
 
@@ -176,17 +171,14 @@ function setupMenteeDashboard() {
         });
     });
     
-    // Activate the first tab by default
-    if (tabButtons.length > 0) {
-        tabButtons[0].click();
-    }
+    tabButtons[0].click();
     
     // Add separate modal setup for mentee dashboard
     setupMenteeModals();
 }
 
 function setupMenteeModals() {
-    // Close button for all modals
+    //close button for all modals
     const closeButtons = document.querySelectorAll(".close-button");
     closeButtons.forEach(button => {
         button.addEventListener("click", function() {
@@ -194,8 +186,8 @@ function setupMenteeModals() {
             modal.style.display = "none";
         });
     });
-    
-    // Close modal when clicking outside
+
+    //close modal when clicking outside modal
     window.addEventListener("click", function(event) {
         const modals = document.querySelectorAll(".modal");
         modals.forEach(modal => {
@@ -231,71 +223,74 @@ function setupModals() {
             }
         });
     });
-    
-
-    const addTaskButton = document.getElementById("add-task-button");
-    if (addTaskButton) {
-        addTaskButton.addEventListener("click", function() {
-            document.getElementById("task-modal").style.display = "block";
-            document.getElementById("task-form").reset();
-            document.getElementById("task-form-title").textContent = "Add New Task";
-            
-            const taskForm = document.getElementById("task-form");
-            taskForm.removeEventListener("submit", taskFormHandler);
-            taskForm.addEventListener("submit", taskFormHandler);
-        });
-    }
-    
-
-    const addMeetingButton = document.getElementById("add-meeting-button");
-    if (addMeetingButton) {
-        addMeetingButton.addEventListener("click", function() {
-            document.getElementById("meeting-modal").style.display = "block";
-            document.getElementById("meeting-form").reset();
-            document.getElementById("meeting-form-title").textContent = "Add New Meeting Note";
-            
-            const meetingForm = document.getElementById("meeting-form");
-            meetingForm.removeEventListener("submit", meetingFormHandler);
-            meetingForm.addEventListener("submit", meetingFormHandler);
-        });
-    }
-}
-function taskFormHandler(e) {
-    e.preventDefault();
-    
-    const menteeUsername = document.getElementById("task-mentee").value;
-    const description = document.getElementById("task-description").value;
-    const dueDateInput = document.getElementById("task-due-date");
-    
-
-    if (!validateTaskDate(dueDateInput.value)) {
-        showError("Task due date must be today or in the future");
-        return;
-    }
-    
-
-    const dueDate = formatDateForBackend(dueDateInput.value);
-    
-    addTask(menteeUsername, description, dueDate);
 }
 
-function meetingFormHandler(e) {
-    e.preventDefault();
+function setupAddTaskForm(menteeUsername, menteeName) {
+    const taskForm = document.getElementById("task-form");
     
-    const menteeUsername = document.getElementById("meeting-mentee").value;
-    const dateInput = document.getElementById("meeting-date");
-    const summary = document.getElementById("meeting-summary").value;
+    // Remove all existing event listeners by cloning and replacing the form
+    const newTaskForm = taskForm.cloneNode(true);
+    taskForm.parentNode.replaceChild(newTaskForm, taskForm);
     
+    // Reset and set up the form
+    document.getElementById("task-form").reset();
+    document.getElementById("task-mentee").value = menteeUsername;
+    document.getElementById("task-form-title").textContent = `Add Task for ${menteeName}`;
+    
+    // Set min date for task due date
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById("task-due-date").min = today;
+    
+    // Add new event listener
+    newTaskForm.addEventListener("submit", function(e) {
+        e.preventDefault();
+        
+        const menteeUsername = document.getElementById("task-mentee").value;
+        const description = document.getElementById("task-description").value;
+        const dueDateInput = document.getElementById("task-due-date");
+        
+        if (!validateTaskDate(dueDateInput.value)) {
+            showError("Task due date must be today or in the future");
+            return;
+        }
+        
+        const dueDate = formatDateForBackend(dueDateInput.value);
+        addTask(menteeUsername, description, dueDate);
+    });
+}
 
-    if (!validateMeetingDate(dateInput.value)) {
-        showError("Meeting date must be today or in the past");
-        return;
-    }
+function setupAddMeetingForm(menteeUsername, menteeName) {
+    const meetingForm = document.getElementById("meeting-form");
     
-
-    const date = formatDateForBackend(dateInput.value);
+    // Remove all existing event listeners by cloning and replacing the form
+    const newMeetingForm = meetingForm.cloneNode(true);
+    meetingForm.parentNode.replaceChild(newMeetingForm, meetingForm);
     
-    addMeetingNote(menteeUsername, date, summary);
+    // Reset and set up the form
+    document.getElementById("meeting-form").reset();
+    document.getElementById("meeting-mentee").value = menteeUsername;
+    document.getElementById("meeting-form-title").textContent = `Add Meeting Note for ${menteeName}`;
+    
+    // Set max date for meeting date
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById("meeting-date").max = today;
+    
+    // Add new event listener
+    newMeetingForm.addEventListener("submit", function(e) {
+        e.preventDefault();
+        
+        const menteeUsername = document.getElementById("meeting-mentee").value;
+        const dateInput = document.getElementById("meeting-date");
+        const summary = document.getElementById("meeting-summary").value;
+        
+        if (!validateMeetingDate(dateInput.value)) {
+            showError("Meeting date must be today or in the past");
+            return;
+        }
+        
+        const date = formatDateForBackend(dateInput.value);
+        addMeetingNote(menteeUsername, date, summary);
+    });
 }
 
 async function login(username, password) {
@@ -346,7 +341,6 @@ async function logout() {
 
 async function registerMentor(username, password, name, email, phone, department) {
     try {
-
         if (!validateName(name)) {
             showError("Invalid name format. Name should start with a letter and contain only letters, spaces, and periods.");
             return;
@@ -443,9 +437,7 @@ async function registerMentee(username, password, name, email, phone, department
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                username, password, name, email, phone, department,
-                year: parseInt(year), digitalId, registrationNumber,
-                parentName, parentEmail, parentContact, mentorUsername
+                username, password, name, email, phone, department,year: parseInt(year), digitalId, registrationNumber,parentName, parentEmail, parentContact, mentorUsername
             })
         });
         
@@ -455,7 +447,7 @@ async function registerMentee(username, password, name, email, phone, department
             showSuccess("Registration successful! Please log in.");
             setTimeout(() => {
                 window.location.href = "index.html";
-            }, 2000);
+            }, 5000);
         } else {
             showError(data.message || "Registration failed");
         }
@@ -500,30 +492,28 @@ async function loadMentees() {
                 menteeItem.innerHTML = `
                     <div class="mentee-header">
                         <h3>${mentee.name}</h3>
-                        <p><strong>Year:</strong> ${mentee.year} | 
-                           <strong>Department:</strong> ${mentee.department}</p>
+                        <p><strong>Year:</strong> ${mentee.year} | <strong>Department:</strong> ${mentee.department}</p>
                     </div>
                     <div class="mentee-details">
                         <div class="contact-info">
-                            <h4>Contact Information</h4>
+                            <h4><u><em>Contact Information</em></u></h4>
                             <p><strong>Email:</strong> ${mentee.email}</p>
                             <p><strong>Phone:</strong> ${mentee.phone}</p>
                         </div>
                         <div class="academic-info">
-                            <h4>Academic Details</h4>
+                            <h4><u><em>Academic Details</em></u></h4>
                             <p><strong>Digital ID:</strong> ${mentee.digitalId}</p>
                             <p><strong>Registration Number:</strong> ${mentee.registrationNumber}</p>
                         </div>
                         <div class="parent-info">
-                            <h4>Parent Information</h4>
-                            <p><strong>Parent Name:</strong> ${mentee.parentName || "N/A"}</p>
-                            <p><strong>Parent Email:</strong> ${mentee.parentEmail || "N/A"}</p>
+                            <h4><u><em>Parent Information</em></u></h4>
+                            <p><strong>Parent Name:</strong> ${mentee.parentName}</p>
+                            <p><strong>Parent Email:</strong> ${mentee.parentEmail}</p>
                             <p><strong>Parent Contact:</strong> ${mentee.parentContact}</p>
                         </div>
                         <div class="mentorship-info">
-                            <h4>Mentorship Details</h4>
-                            <p><strong>Meetings:</strong> ${mentee.meetingCount} | 
-                               <strong>Tasks:</strong> ${mentee.taskCount}</p>
+                            <h4><u><em>Mentorship Details</em></u></h4>
+                            <p><strong>Meetings:</strong> ${mentee.meetingCount} | <strong>Tasks:</strong> ${mentee.taskCount}</p>
                         </div>
                     </div>
                     <div class="mentee-actions">
@@ -1096,9 +1086,7 @@ async function addTask(menteeUsername, description, dueDate) {
             document.getElementById("task-modal").style.display = "none";
             showSuccess("Task added successfully!");
             
-            if (document.getElementById("tasks-tab").classList.contains("active")) {
-                viewMenteeTasks(menteeUsername, currentMenteeName);
-            }
+            loadMentees();
         } else {
             showError(data.message || "Failed to add task");
         }
@@ -1196,11 +1184,7 @@ async function addMeetingNote(menteeUsername, date, summary) {
             document.getElementById("meeting-modal").style.display = "none";
             showSuccess("Meeting note added successfully!");
             
-            if (document.getElementById("meetings-tab").classList.contains("active")) {
-                viewMenteeMeetings(menteeUsername, currentMenteeName);
-            } else {
-                loadMentees();
-            }
+            loadMentees();
         } else {
             showError(data.message || "Failed to add meeting note");
         }
@@ -1436,70 +1420,3 @@ function setupMeetingEditForm(menteeUsername, noteIndex, date, summary, menteeNa
     });
 }
 
-function setupAddTaskForm(menteeUsername, menteeName) {
-    const taskForm = document.getElementById("task-form");
-    
-    // Remove all existing event listeners by cloning and replacing the form
-    const newTaskForm = taskForm.cloneNode(true);
-    taskForm.parentNode.replaceChild(newTaskForm, taskForm);
-    
-    // Reset and set up the form
-    document.getElementById("task-form").reset();
-    document.getElementById("task-mentee").value = menteeUsername;
-    document.getElementById("task-form-title").textContent = `Add Task for ${menteeName}`;
-    
-    // Set min date for task due date
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById("task-due-date").min = today;
-    
-    // Add new event listener
-    newTaskForm.addEventListener("submit", function(e) {
-        e.preventDefault();
-        
-        const menteeUsername = document.getElementById("task-mentee").value;
-        const description = document.getElementById("task-description").value;
-        const dueDateInput = document.getElementById("task-due-date");
-        
-        if (!validateTaskDate(dueDateInput.value)) {
-            showError("Task due date must be today or in the future");
-            return;
-        }
-        
-        const dueDate = formatDateForBackend(dueDateInput.value);
-        addTask(menteeUsername, description, dueDate);
-    });
-}
-
-function setupAddMeetingForm(menteeUsername, menteeName) {
-    const meetingForm = document.getElementById("meeting-form");
-    
-    // Remove all existing event listeners by cloning and replacing the form
-    const newMeetingForm = meetingForm.cloneNode(true);
-    meetingForm.parentNode.replaceChild(newMeetingForm, meetingForm);
-    
-    // Reset and set up the form
-    document.getElementById("meeting-form").reset();
-    document.getElementById("meeting-mentee").value = menteeUsername;
-    document.getElementById("meeting-form-title").textContent = `Add Meeting Note for ${menteeName}`;
-    
-    // Set max date for meeting date
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById("meeting-date").max = today;
-    
-    // Add new event listener
-    newMeetingForm.addEventListener("submit", function(e) {
-        e.preventDefault();
-        
-        const menteeUsername = document.getElementById("meeting-mentee").value;
-        const dateInput = document.getElementById("meeting-date");
-        const summary = document.getElementById("meeting-summary").value;
-        
-        if (!validateMeetingDate(dateInput.value)) {
-            showError("Meeting date must be today or in the past");
-            return;
-        }
-        
-        const date = formatDateForBackend(dateInput.value);
-        addMeetingNote(menteeUsername, date, summary);
-    });
-}

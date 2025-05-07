@@ -38,7 +38,7 @@ app.post('/api/login', async (req, res) => {
         const result = await executeBackend('login', [username, password]);
         res.json(result);
     } catch (error) {
-        res.status(500).json({ success: false, message: 'Server error' });
+        res.json({ success: false, message: 'Server error' });
     }
 });
 
@@ -52,7 +52,7 @@ app.post('/api/register_mentor', async (req, res) => {
         const result = await executeBackend('register_mentor', [username, password, name, email, phone, department]);
         res.json(result);
     } catch (error) {
-        res.status(500).json({ success: false, message: 'Server error' });
+        res.json({ success: false, message: 'Server error' });
     }
 });
 
@@ -62,7 +62,7 @@ app.post('/api/register_mentee', async (req, res) => {
         const result = await executeBackend('register_mentee', [username, password, name, email, phone, department, year.toString(), digitalId, registrationNumber, parentName, parentEmail, parentContact, mentorUsername]);
         res.json(result);
     } catch (error) {
-        res.status(500).json({ success: false, message: 'Server error' });
+        res.json({ success: false, message: 'Server error' });
     }
 });
 
@@ -71,7 +71,7 @@ app.get('/api/mentors', async (req, res) => {
         const result = await executeBackend('get_mentors', []);
         res.json(result);
     } catch (error) {
-        res.status(500).json({ success: false, message: 'Server error' });
+        res.json({ success: false, message: 'Server error' });
     }
 });
 
@@ -81,7 +81,7 @@ app.get('/api/profile', async (req, res) => {
         const result = await executeBackend('get_profile', [username]);
         res.json(result);
     } catch (error) {
-        res.status(500).json({ success: false, message: 'Server error' });
+        res.json({ success: false, message: 'Server error' });
     }
 });
 
@@ -91,7 +91,7 @@ app.get('/api/tasks', async (req, res) => {
         const result = await executeBackend('get_tasks', [mentee]);
         res.json(result);
     } catch (error) {
-        res.status(500).json({ success: false, message: 'Server error' });
+        res.json({ success: false, message: 'Server error' });
     }
 });
 
@@ -101,7 +101,7 @@ app.post('/api/add_task', async (req, res) => {
         const result = await executeBackend('add_task', [mentee, description, dueDate]);
         res.json(result);
     } catch (error) {
-        res.status(500).json({ success: false, message: 'Server error' });
+        res.json({ success: false, message: 'Server error' });
     }
 });
 
@@ -111,7 +111,7 @@ app.post('/api/delete_task', async (req, res) => {
         const result = await executeBackend('delete_task', [mentee, index.toString()]);
         res.json(result);
     } catch (error) {
-        res.status(500).json({ success: false, message: 'Server error' });
+        res.json({ success: false, message: 'Server error' });
     }
 });
 
@@ -121,7 +121,7 @@ app.post('/api/edit_task', async (req, res) => {
         const result = await executeBackend('edit_task', [mentee, index.toString(), description, dueDate]);
         res.json(result);
     } catch (error) {
-        res.status(500).json({ success: false, message: 'Server error' });
+        res.json({ success: false, message: 'Server error' });
     }
 });
 
@@ -131,7 +131,7 @@ app.get('/api/meetings', async (req, res) => {
         const result = await executeBackend('get_meetings', [mentee]);
         res.json(result);
     } catch (error) {
-        res.status(500).json({ success: false, message: 'Server error' });
+        res.json({ success: false, message: 'Server error' });
     }
 });
 
@@ -141,7 +141,7 @@ app.post('/api/add_meeting', async (req, res) => {
         const result = await executeBackend('add_meeting', [mentee, date, summary]);
         res.json(result);
     } catch (error) {
-        res.status(500).json({ success: false, message: 'Server error' });
+        res.json({ success: false, message: 'Server error' });
     }
 });
 
@@ -151,7 +151,7 @@ app.post('/api/edit_meeting', async (req, res) => {
         const result = await executeBackend('edit_meeting', [mentee, index.toString(), date, summary]);
         res.json(result);
     } catch (error) {
-        res.status(500).json({ success: false, message: 'Server error' });
+        res.json({ success: false, message: 'Server error' });
     }
 });
 
@@ -161,7 +161,7 @@ app.post('/api/delete_meeting', async (req, res) => {
         const result = await executeBackend('delete_meeting', [mentee, index.toString()]);
         res.json(result);
     } catch (error) {
-        res.status(500).json({ success: false, message: 'Server error' });
+        res.json({ success: false, message: 'Server error' });
     }
 });
 
@@ -172,7 +172,7 @@ app.post('/api/update_profile', async (req, res) => {
         const result = await executeBackend('update_profile', [username, name, email, phone, department, year.toString(), digitalId, registrationNumber, parentName, parentEmail, parentContact]);
         res.json(result);
     } catch (error) {
-        res.status(500).json({ success: false, message: 'Server error' });
+        res.json({ success: false, message: 'Server error' });
     }
 });
 
@@ -182,7 +182,7 @@ app.get('/api/mentee_details', async (req, res) => {
         const result = await executeBackend('get_mentee_details', [mentor]);
         res.json(result);
     } catch (error) {
-        res.status(500).json({ success: false, message: 'Server error' });
+        res.json({ success: false, message: 'Server error' });
     }
 });
 
